@@ -1,9 +1,11 @@
 @import '../../../styles/variables';
 
 .order-add-page {
-  padding: 2rem;
+  padding: -1rem;
   background-color: #f8fafc;
   min-height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
 
   .page-header {
     margin-bottom: 2rem;
@@ -16,7 +18,7 @@
       text-decoration: none;
       font-weight: 500;
       margin-bottom: 1rem;
-      font-size: 0.9rem;
+      font-size: 1rem;
       transition: color 0.2s ease;
 
       &:hover {
@@ -97,6 +99,15 @@
         grid-template-columns: 1fr 1fr;
         gap: 1.5rem;
         margin-bottom: 1.5rem;
+        align-items: start;
+
+        &.three-columns {
+          grid-template-columns: 1fr 1fr 1fr;
+          
+          @media (max-width: 992px) {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
 
         @media (max-width: 768px) {
           grid-template-columns: 1fr;
@@ -105,9 +116,15 @@
 
       .form-group {
         margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
 
         &.flex-2 {
           flex: 2;
+        }
+
+        &.full-width {
+          grid-column: 1 / -1;
         }
 
         label {
@@ -125,9 +142,10 @@
         input, textarea, select {
           width: 100%;
           color: black;
-          padding: 0.75rem 1rem;
+          padding: 0.75rem 0.5rem;
           border: 1px solid #e2e8f0;
           border-radius: 8px;
+        
           font-size: 0.95rem;
           background-color: #ffffff;
           transition: all 0.2s ease;
@@ -233,12 +251,21 @@
           .item-row {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr 1fr auto;
-            gap: 1rem;
+            gap: 2rem;
             align-items: end;
+
+            @media (max-width: 992px) {
+              grid-template-columns: 1fr 1fr 1fr auto;
+            }
 
             @media (max-width: 768px) {
               grid-template-columns: 1fr;
               gap: 1rem;
+              
+              .remove-item-btn {
+                justify-self: center;
+                width: fit-content;
+              }
             }
 
             .remove-item-btn {
@@ -251,6 +278,7 @@
               transition: background-color 0.2s ease;
               display: flex;
               align-items: center;
+              margin-bottom: 25px;
               justify-content: center;
 
               &:hover:not(:disabled) {
@@ -272,6 +300,11 @@
           grid-template-columns: 1fr 1fr 1fr;
           gap: 1.5rem;
           margin-bottom: 2rem;
+          align-items: start;
+
+          @media (max-width: 992px) {
+            grid-template-columns: 1fr 1fr;
+          }
 
           @media (max-width: 768px) {
             grid-template-columns: 1fr;
@@ -305,9 +338,20 @@
     .form-actions {
       display: flex;
       justify-content: flex-end;
+      align-items: center;
       gap: 1rem;
       padding-top: 2rem;
       border-top: 1px solid #e2e8f0;
+      
+      @media (max-width: 768px) {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        
+        .cancel-btn,
+        .save-btn {
+          justify-content: center;
+        }
+      }
 
       .cancel-btn {
         display: flex;
@@ -351,12 +395,40 @@
     }
   }
 
-  @media (max-width: 768px) {
-    padding: 1rem;
-
+  @media (max-width: 992px) {
+    padding: 1.5rem;
+    
     .order-form {
       .form-section {
         padding: 1.5rem;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+
+    .page-header {
+      text-align: center;
+      
+      .back-btn {
+        justify-content: center;
+      }
+    }
+
+    .order-form {
+      .form-section {
+        padding: 1.25rem;
+        
+        .section-header {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 1rem;
+          
+          .add-item-btn {
+            justify-content: center;
+          }
+        }
       }
     }
   }
