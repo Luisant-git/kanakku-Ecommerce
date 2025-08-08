@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { FiHome, FiShoppingBag, FiUsers, FiPieChart, FiSettings, FiDollarSign, FiX } from 'react-icons/fi'
+import kanakkuLogo from '../../../assets/kanakku.png'
 import './Sidebar.scss'
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -8,7 +9,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       {isOpen && <div className="sidebar-overlay" onClick={onClose} />}
       <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <div className="sidebar-header">
-        <img src="/src/assets/kanakku.png" alt="Kanakku" className="logo" />
+        <img src={kanakkuLogo} alt="Kanakku" className="logo" />
         <button className="sidebar-close" onClick={onClose}>
           <FiX />
         </button>
