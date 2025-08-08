@@ -1,0 +1,35 @@
+@import '../../../styles/variables';
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+
+  &.pending {
+    background-color: rgba($warning, 0.1);
+    color: $warning;
+  }
+
+  &.processing {
+    background-color: rgba($info, 0.1);
+    color: $info;
+  }
+
+  &.shipped {
+    background-color: rgba($primary, 0.1);
+    color: $primary;
+  }
+
+  &.completed {
+    background-color: rgba($secondary, 0.1);
+    color: $secondary;
+  }
+
+  &.cancelled {
+    background-color: rgba($danger, 0.1);
+    color: $danger;
+  }
+}

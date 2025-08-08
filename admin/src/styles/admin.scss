@@ -1,0 +1,109 @@
+@import 'variables';
+@import 'mixins';
+
+// Base styles
+body {
+  font-family: $font-primary;
+  background-color: $light;
+  color: $dark;
+  margin: 0;
+  padding: 0;
+}
+
+// Admin layout
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  transition: margin-left 0.3s ease;
+}
+
+.content-wrapper {
+  padding: 2rem;
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .content-wrapper {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .content-wrapper {
+    padding: 0.75rem;
+  }
+}
+
+// Typography
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-secondary;
+  color: $dark;
+}
+
+// Buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  border: none;
+
+  &-primary {
+    background: $primary;
+    color: white;
+
+    &:hover {
+      background: $primary-dark;
+    }
+  }
+
+  &-secondary {
+    background: $secondary;
+    color: white;
+
+    &:hover {
+      background: darken($secondary, 10%);
+    }
+  }
+
+  &-danger {
+    background: $danger;
+    color: white;
+
+    &:hover {
+      background: darken($danger, 10%);
+    }
+  }
+
+  &-outline {
+    background: transparent;
+    border: 1px solid $primary;
+    color: $primary;
+
+    &:hover {
+      background: rgba($primary, 0.1);
+    }
+  }
+}
+
+// Import components
+@import '../admin/components/Sidebar/Sidebar';
+@import '../admin/components/TopNav/TopNav';
+@import '../admin/components/StatsCard/StatsCard';
+@import '../admin/components/DataTable/DataTable';
+@import '../admin/components/ChartCard/ChartCard';

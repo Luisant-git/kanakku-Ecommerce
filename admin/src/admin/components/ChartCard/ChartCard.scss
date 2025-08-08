@@ -1,0 +1,21 @@
+@import '../../../styles/variables';
+
+.chart-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: $shadow-sm;
+  height: 100%;
+
+  h3 {
+    margin: 0 0 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $dark;
+  }
+
+  .chart-container {
+    height: 300px;
+    width: 100%;
+  }
+}
