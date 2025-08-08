@@ -1,0 +1,101 @@
+@import '../../styles/variables';
+
+.header {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 1rem 0;
+
+  &__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 700;
+    color: $dark-color;
+    font-size: 1.2rem;
+
+    img {
+      height: 40px;
+      width: 150px;
+    }
+
+    @media (max-width: $tablet) {
+      font-size: 0.5rem;  // Reduce logo text font size on tablet/mobile
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.7rem; // Further reduce on small mobiles
+    }
+  }
+
+  &__menu-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: none;
+
+    @media (max-width: $tablet) {
+      display: block;
+    }
+  }
+
+  &__nav {
+    ul {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+
+      li {
+        a {
+          font-weight: 500;
+          transition: color 0.3s ease;
+
+          &:hover {
+            color: $primary-color;
+          }
+        }
+
+        .cart-link {
+          background: $primary-color;
+          color: white;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+
+          &:hover {
+            background: darken($primary-color, 10%);
+          }
+        }
+      }
+    }
+
+    @media (max-width: $tablet) {
+      position: fixed;
+      top: 80px;
+      left: 0;
+      width: 100%;
+      background: white;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      transform: translateY(-150%);
+      transition: transform 0.3s ease;
+      padding: 2rem;
+
+      &.open {
+        transform: translateY(0);
+      }
+
+      ul {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+    }
+  }
+}

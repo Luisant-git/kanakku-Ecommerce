@@ -1,0 +1,112 @@
+@import '../../styles/variables';
+
+.account-page {
+  padding: 3rem 0;
+
+  .page-title {
+    margin-bottom: 2rem;
+    color: $dark-color;
+  }
+
+  .account-content {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 3rem;
+
+    @media (max-width: $tablet) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .account-sidebar {
+    .account-welcome {
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid #eee;
+
+      h3 {
+        margin-bottom: 0.5rem;
+        color: $primary-color;
+      }
+
+      p {
+        color: $text-color;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .account-nav {
+    ul {
+      list-style: none;
+
+      li {
+        margin-bottom: 0.5rem;
+
+        a, button {
+          display: block;
+          padding: 0.8rem 1rem;
+          color: $text-color;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+          background: none;
+          border: none;
+          text-align: left;
+          width: 100%;
+          font-family: inherit;
+          font-size: inherit;
+          cursor: pointer;
+
+          &:hover {
+            background: rgba($primary-color, 0.1);
+            color: $primary-color;
+          }
+        }
+      }
+    }
+  }
+
+  .account-main {
+    .account-section {
+      margin-bottom: 2rem;
+
+      h2 {
+        margin-bottom: 1.5rem;
+        color: $dark-color;
+      }
+    }
+  }
+
+  .dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  .dashboard-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+
+    h3 {
+      margin-bottom: 1rem;
+      color: $primary-color;
+    }
+
+    p {
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+  }
+
+  .btn--outline {
+    background: none;
+    border: 1px solid $primary-color;
+    color: $primary-color;
+
+    &:hover {
+      background: rgba($primary-color, 0.1);
+    }
+  }
+}

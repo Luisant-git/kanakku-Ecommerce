@@ -1,0 +1,44 @@
+@import '../../styles/variables';
+
+.products-page {
+  padding: 3rem 0;
+
+  .page-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: $dark-color;
+  }
+
+  .products-filter {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: $light-bg;
+      }
+
+      &.active {
+        background: $primary-color;
+        color: white;
+        border-color: $primary-color;
+      }
+    }
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+}
