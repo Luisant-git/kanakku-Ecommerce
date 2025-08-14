@@ -1,28 +1,36 @@
-import { Link } from 'react-router-dom'
-import './Cart.scss'
-
-// Temporary data - replace with state management
-const cartItems = [
-  {
-    id: 1,
-    name: 'Premium Accounting Software',
-    price: 4999,
-    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=100&q=80',
-    quantity: 1
-  },
-  {
-    id: 2,
-    name: 'Business Tax Guide',
-    price: 999,
-    image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=100&q=80',
-    quantity: 2
-  }
-]
+import { Link } from "react-router-dom";
+import "./Cart.scss";
+import { useEffect, useState } from "react";
+import { getCartApi, removeFromCartApi } from "../../api/Cart";
+import { toast } from "react-toastify";
 
 const Cart = () => {
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  const tax = subtotal * 0.18 // 18% GST
-  const total = subtotal + tax
+  const [cartItems, setCartItems] = useState([]);
+  const [subtotal, setSubtotal] = useState(0);
+  const [tax, setTax] = useState(0);
+  const [total, setTotal] = useState(0);
+
+  const getCartItems = async () => {
+    // API call to fetch cart items
+    const response = await getCartApi();
+    setCartItems(response?.items);
+    setSubtotal(response?.subtotal)
+    setTax(response?.tax)
+    setTotal(response?.total)
+    console.log(response);
+  };
+
+  const handleRemoveFromCart = async (productId) => {
+    // API call to remove item from cart
+    const response = await removeFromCartApi(productId);
+    console.log(response);
+    toast.success('Item removed from cart');
+    getCartItems();
+  };
+
+  useEffect(() => {
+    getCartItems();
+  }, []);
 
   return (
     <div className="cart-page">
@@ -32,27 +40,43 @@ const Cart = () => {
         {cartItems.length === 0 ? (
           <div className="empty-cart">
             <p>Your cart is empty</p>
-            <Link to="/products" className="btn btn--primary">Continue Shopping</Link>
+            <Link to="/products" className="btn btn--primary">
+              Continue Shopping
+            </Link>
           </div>
         ) : (
           <div className="cart-content">
             <div className="cart-items">
-              {cartItems.map(item => (
-                <div key={item.id} className="cart-item">
+              {cartItems.map((item) => (
+                <div key={item.product.id} className="cart-item">
                   <div className="cart-item__image">
-                    <img src={item.image} alt={item.name} />
+                    <img
+                      src={
+                        Array.isArray(item?.product.imageUrl) &&
+                        item.product.imageUrl.length > 0
+                          ? item.product.imageUrl[0]
+                          : "example.jpg"
+                      }
+                      alt={item.product.name}
+                    />
                   </div>
                   <div className="cart-item__info">
-                    <h3>{item.name}</h3>
-                    <span className="cart-item__price">₹{item.price.toLocaleString()}</span>
+                    <h3>{item.product.name}</h3>
+                    <span className="cart-item__price">₹{item.product.price}</span>
                   </div>
                   <div className="cart-item__quantity">
-                    <input type="number" min="1" value={item.quantity} readOnly />
+                    <input
+                      type="number"
+                      min="1"
+                      value={1}
+                      readOnly
+                      disabled
+                    />
                   </div>
                   <div className="cart-item__total">
-                    ₹{(item.price * item.quantity).toLocaleString()}
+                    ₹{item.product.price}
                   </div>
-                  <button className="cart-item__remove">×</button>
+                  <button className="cart-item__remove" onClick={()=>handleRemoveFromCart(item?.product?.id)}>×</button>
                 </div>
               ))}
             </div>
@@ -61,24 +85,28 @@ const Cart = () => {
               <h2>Order Summary</h2>
               <div className="summary-row">
                 <span>Subtotal</span>
-                <span>₹{subtotal.toLocaleString()}</span>
+                <span>₹{subtotal}</span>
               </div>
               <div className="summary-row">
-                <span>GST (18%)</span>
-                <span>₹{tax.toLocaleString()}</span>
+                <span>GST (10%)</span>
+                <span>₹{tax}</span>
               </div>
               <div className="summary-row total">
                 <span>Total</span>
-                <span>₹{total.toLocaleString()}</span>
+                <span>₹{total}</span>
               </div>
-              <Link to="/checkout" className="btn btn--primary btn--block">Proceed to Checkout</Link>
-              <Link to="/products" className="btn btn--outline btn--block">Continue Shopping</Link>
+              <Link to="/checkout" className="btn btn--primary btn--block">
+                Proceed to Checkout
+              </Link>
+              <Link to="/products" className="btn btn--outline btn--block">
+                Continue Shopping
+              </Link>
             </div>
           </div>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Cart
+export default Cart;

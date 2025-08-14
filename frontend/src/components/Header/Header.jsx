@@ -1,12 +1,25 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Logo from '../../assets/kanakku.png'
 import './Header.scss'
+import { getCartCountApi } from '../../api/Cart'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
+
+  const getCartCount = async () => {
+    const response = await getCartCountApi();
+    console.log(response);
+    
+    setCartCount(response.count);
+  }
 
   const closeMenu = () => setIsMenuOpen(false)
+
+  useEffect(() => {
+    getCartCount()
+  }, [])
 
   return (
     <header className="header">
@@ -30,7 +43,7 @@ const Header = () => {
               <li><Link to="/products" onClick={closeMenu}>Products</Link></li>
               <li><Link to="/about" onClick={closeMenu}>About Us</Link></li>
               <li><Link to="/contact" onClick={closeMenu}>Contact</Link></li>
-              <li><Link to="/cart" className="cart-link" onClick={closeMenu}>Cart (0)</Link></li>
+              <li><Link to="/cart" className="cart-link" onClick={closeMenu}>Cart {cartCount}</Link></li>
             </ul>
           </nav>
         </div>

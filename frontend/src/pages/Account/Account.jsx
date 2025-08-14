@@ -1,11 +1,10 @@
-import { useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { UserContext } from '../../App'
 import './Account.scss'
+import { useState } from 'react'
 
 const Account = () => {
-  const { user, logout } = useContext(UserContext)
-
+  const [user, setUser] = useState('Naveen V');
+  const [email, setEmail] = useState('naveen@example.com');
   return (
     <div className="account-page">
       <div className="container">
@@ -24,7 +23,7 @@ const Account = () => {
                 <li><Link to="/account/orders">My Orders</Link></li>
                 <li><Link to="/account/addresses">Addresses</Link></li>
                 <li><Link to="/account/details">Account Details</Link></li>
-                <li><button onClick={logout}>Logout</button></li>
+                <li><button >Logout</button></li>
               </ul>
             </nav>
           </div>

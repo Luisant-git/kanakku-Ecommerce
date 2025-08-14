@@ -1,139 +1,160 @@
-import { useState, useEffect } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
-import { FiArrowLeft, FiSave, FiTrash2, FiUpload, FiX, FiPackage, FiDollarSign, FiBarChart, FiTag, FiCalendar, FiAlertTriangle } from 'react-icons/fi'
-import './ProductEdit.scss'
+import { useState, useEffect } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import {
+  FiArrowLeft,
+  FiSave,
+  FiTrash2,
+  FiUpload,
+  FiX,
+  FiPackage,
+  FiDollarSign,
+  FiBarChart,
+  FiTag,
+  FiCalendar,
+  FiAlertTriangle,
+} from "react-icons/fi";
+import { updateProductApi, getProductByIdApi } from "../../api/Product";
+import uploadImageApi from "../../api/Upload";
+import "./ProductEdit.scss";
 
 const ProductEdit = () => {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  
-  const [formData, setFormData] = useState({
-    name: 'Premium Accounting Software Pro',
-    description: 'Professional accounting software designed for small to medium businesses with advanced reporting features',
-    shortDescription: 'Professional accounting software for businesses',
-    price: '299.99',
-    comparePrice: '399.99',
-    costPrice: '150.00',
-    category: 'software',
-    subCategory: 'accounting',
-    brand: 'kanakku',
-    sku: 'KNK-ACC-PRO-001',
-    barcode: '1234567890123',
-    stock: '45',
-    minStock: '10',
-    maxStock: '100',
-    status: 'active',
-    visibility: 'visible',
-    featured: true,
-    weight: '0',
-    dimensions: {
-      length: '0',
-      width: '0',
-      height: '0'
-    },
-    seo: {
-      title: 'Premium Accounting Software Pro - Kanakku',
-      description: 'Professional accounting software with advanced features',
-      keywords: 'accounting, software, business, finance'
-    },
-    tags: ['accounting', 'software', 'business', 'finance'],
-    images: [],
-    variants: [],
-    createdAt: '2024-01-15',
-    updatedAt: new Date().toISOString().split('T')[0]
-  })
-  
-  const [imagePreview, setImagePreview] = useState([
-    '/src/assets/product-sample.jpg'
-  ])
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showImageDeleteModal, setShowImageDeleteModal] = useState(false)
-  const [imageToDelete, setImageToDelete] = useState(null)
-  const [newTag, setNewTag] = useState('')
-  const [activeTab, setActiveTab] = useState('basic')
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({});
+
+  const [imagePreview, setImagePreview] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]); // Store File objects for new uploads
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showImageDeleteModal, setShowImageDeleteModal] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState(null);
+  const [newTag, setNewTag] = useState("");
+  const [activeTab, setActiveTab] = useState("basic");
 
   useEffect(() => {
-    console.log('Loading product:', id)
-  }, [id])
+    async function fetchProduct() {
+      if (!id) return;
+      const product = await getProductByIdApi(parseInt(id));
+      if (product) {
+        setFormData({
+          name: product.name || "",
+          description: product.description || "",
+          price: product.price?.toString() || "",
+          // add other fields as needed
+        });
+        setImagePreview(
+          product.imageUrl && product.imageUrl.length > 0
+            ? product.imageUrl
+            : []
+        );
+        setImageFiles([]); // reset new uploads
+      }
+    }
+    fetchProduct();
+  }, [id]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
-    
-    if (name.includes('.')) {
-      const [section, field] = name.split('.')
-      setFormData(prev => ({
+    const { name, value, type, checked } = e.target;
+
+    if (name.includes(".")) {
+      const [section, field] = name.split(".");
+      setFormData((prev) => ({
         ...prev,
         [section]: {
           ...prev[section],
-          [field]: value
-        }
-      }))
+          [field]: value,
+        },
+      }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: type === 'checkbox' ? checked : value
-      }))
+        [name]: type === "checkbox" ? checked : value,
+      }));
     }
-  }
-  
+  };
+
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files)
-    files.forEach(file => {
-      const reader = new FileReader()
+    const files = Array.from(e.target.files);
+    setImageFiles((prev) => [...prev, ...files]);
+    files.forEach((file) => {
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(prev => [...prev, reader.result])
-      }
-      reader.readAsDataURL(file)
-    })
-  }
-  
+        setImagePreview((prev) => [...prev, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const removeImage = (index) => {
-    setImagePreview(prev => prev.filter((_, i) => i !== index))
-    setShowImageDeleteModal(false)
-    setImageToDelete(null)
-  }
-  
+    setImagePreview((prev) => prev.filter((_, i) => i !== index));
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setShowImageDeleteModal(false);
+    setImageToDelete(null);
+  };
+
   const handleImageDeleteClick = (index) => {
-    setImageToDelete(index)
-    setShowImageDeleteModal(true)
-  }
-  
+    setImageToDelete(index);
+    setShowImageDeleteModal(true);
+  };
+
   const addTag = () => {
     if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, newTag.trim()]
-      }))
-      setNewTag('')
+        tags: [...prev.tags, newTag.trim()],
+      }));
+      setNewTag("");
     }
-  }
-  
-  const removeTag = (tagToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }))
-  }
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Product updated:', formData)
-  }
+  const removeTag = (tagToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    let imageUrls = imagePreview.filter((img) => img.startsWith("http"));
+    // Upload new images if any
+    if (imageFiles.length > 0) {
+      const imageData = new FormData();
+      imageFiles.forEach((file) => {
+        imageData.append("files", file);
+      });
+      const uploadRes = await uploadImageApi(imageData);
+      if (uploadRes && uploadRes.urls) {
+        imageUrls = [...imageUrls, ...uploadRes.urls];
+      }
+    }
+    const productPayload = {
+      name: formData.name,
+      description: formData.description,
+      price: parseFloat(formData.price),
+      imageUrl: imageUrls,
+      // add other fields as needed
+    };
+    const res = await updateProductApi(id, productPayload);
+    if (res && res.id) {
+      navigate("/admin/products");
+    } else {
+      alert("Error updating product");
+    }
+  };
 
   const handleDelete = () => {
-    console.log('Product deleted:', id)
-    navigate('/admin/products')
-  }
+    console.log("Product deleted:", id);
+    navigate("/admin/products");
+  };
 
   const tabs = [
-    { id: 'basic', label: 'Basic Info', icon: FiPackage },
-    { id: 'pricing', label: 'Pricing', icon: FiDollarSign },
-    { id: 'inventory', label: 'Inventory', icon: FiBarChart },
-    { id: 'seo', label: 'SEO', icon: FiTag },
-    { id: 'media', label: 'Media', icon: FiUpload }
-  ]
-
-
+    { id: "basic", label: "Basic Info", icon: FiPackage },
+    { id: "pricing", label: "Pricing", icon: FiDollarSign },
+    // { id: 'inventory', label: 'Inventory', icon: FiBarChart },
+    // { id: 'seo', label: 'SEO', icon: FiTag },
+    { id: "media", label: "Media", icon: FiUpload },
+  ];
 
   return (
     <div className="product-edit-page">
@@ -146,47 +167,47 @@ const ProductEdit = () => {
             <h1>Edit Product</h1>
             <div className="product-meta">
               <span className="product-id">ID: #{id}</span>
-              <span className="status-badge">
-                {formData.status}
-              </span>
+              <span className="status-badge">{formData.status}</span>
             </div>
           </div>
         </div>
-        <button 
-          type="button" 
+        <button
+          type="button"
           className="delete-btn"
           onClick={() => setShowDeleteModal(true)}
         >
           <FiTrash2 /> Delete
         </button>
       </div>
-      
+
       <div className="product-tabs">
-        {tabs.map(tab => {
-          const Icon = tab.icon
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
           return (
             <button
               key={tab.id}
               type="button"
-              className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+              className={`tab-btn ${activeTab === tab.id ? "active" : ""}`}
               onClick={() => setActiveTab(tab.id)}
             >
               <Icon /> {tab.label}
             </button>
-          )
+          );
         })}
       </div>
-      
+
       <form onSubmit={handleSubmit} className="product-form">
-        {activeTab === 'basic' && (
+        {activeTab === "basic" && (
           <div className="form-section">
             <h2 className="section-title">
               <FiPackage className="section-icon" />
               Basic Information
             </h2>
-            
+
             <div className="form-group">
-              <label>Product Name <span className="required">*</span></label>
+              <label>
+                Product Name <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 name="name"
@@ -196,8 +217,8 @@ const ProductEdit = () => {
                 required
               />
             </div>
-            
-            <div className="form-group">
+
+            {/* <div className="form-group">
               <label>Short Description</label>
               <input
                 type="text"
@@ -206,8 +227,8 @@ const ProductEdit = () => {
                 value={formData.shortDescription}
                 onChange={handleChange}
               />
-            </div>
-            
+            </div> */}
+
             <div className="form-group">
               <label>Description</label>
               <textarea
@@ -219,7 +240,7 @@ const ProductEdit = () => {
               />
             </div>
 
-            <div className="form-row">
+            {/* <div className="form-row">
               <div className="form-group">
                 <label>Category <span className="required">*</span></label>
                 <select
@@ -245,9 +266,9 @@ const ProductEdit = () => {
                   <option value="adobe">Adobe</option>
                 </select>
               </div>
-            </div>
+            </div> */}
 
-            <div className="form-row">
+            {/* <div className="form-row">
               <div className="form-group">
                 <label>SKU</label>
                 <input
@@ -267,9 +288,9 @@ const ProductEdit = () => {
                   <option value="draft">Draft</option>
                 </select>
               </div>
-            </div>
+            </div> */}
 
-            <div className="form-group">
+            {/* <div className="form-group">
               <div className="checkbox-wrapper">
                 <input
                   type="checkbox"
@@ -279,20 +300,22 @@ const ProductEdit = () => {
                 />
                 <label>Featured Product</label>
               </div>
-            </div>
+            </div> */}
           </div>
         )}
 
-        {activeTab === 'pricing' && (
+        {activeTab === "pricing" && (
           <div className="form-section">
             <h2 className="section-title">
               <FiDollarSign className="section-icon" />
               Pricing Information
             </h2>
-            
+
             <div className="form-row">
               <div className="form-group">
-                <label>Price <span className="required">*</span></label>
+                <label>
+                  Price <span className="required">*</span>
+                </label>
                 <input
                   type="number"
                   step="0.01"
@@ -303,8 +326,8 @@ const ProductEdit = () => {
                   required
                 />
               </div>
-              
-              <div className="form-group">
+
+              {/* <div className="form-group">
                 <label>Compare Price</label>
                 <input
                   type="number"
@@ -314,10 +337,10 @@ const ProductEdit = () => {
                   value={formData.comparePrice}
                   onChange={handleChange}
                 />
-              </div>
+              </div> */}
             </div>
-            
-            <div className="form-group">
+
+            {/* <div className="form-group">
               <label>Cost Price</label>
               <input
                 type="number"
@@ -327,9 +350,9 @@ const ProductEdit = () => {
                 value={formData.costPrice}
                 onChange={handleChange}
               />
-            </div>
-            
-            <div className="pricing-summary">
+            </div> */}
+
+            {/* <div className="pricing-summary">
               <div className="summary-row profit">
                 <span>Profit Margin:</span>
                 <span>${(parseFloat(formData.price || 0) - parseFloat(formData.costPrice || 0)).toFixed(2)}</span>
@@ -342,11 +365,11 @@ const ProductEdit = () => {
                     : 0}%
                 </span>
               </div>
-            </div>
+            </div> */}
           </div>
         )}
 
-        {activeTab === 'inventory' && (
+        {/* {activeTab === 'inventory' && (
           <div className="form-section">
             <h2 className="section-title">
               <FiBarChart className="section-icon" />
@@ -403,9 +426,9 @@ const ProductEdit = () => {
               )}
             </div>
           </div>
-        )}
+        )} */}
 
-        {activeTab === 'seo' && (
+        {/* {activeTab === 'seo' && (
           <div className="form-section">
             <h2 className="section-title">
               <FiTag className="section-icon" />
@@ -458,15 +481,15 @@ const ProductEdit = () => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
-        {activeTab === 'media' && (
+        {activeTab === "media" && (
           <div className="form-section">
             <h2 className="section-title">
               <FiUpload className="section-icon" />
               Product Images
             </h2>
-            
+
             <div className="image-upload">
               <div className="upload-area">
                 <input
@@ -479,7 +502,7 @@ const ProductEdit = () => {
                 <div className="upload-text">Click to upload images</div>
                 <div className="upload-hint">PNG, JPG, GIF up to 10MB each</div>
               </div>
-              
+
               {imagePreview.length > 0 && (
                 <div className="image-preview">
                   {imagePreview.map((image, index) => (
@@ -492,7 +515,9 @@ const ProductEdit = () => {
                       >
                         <FiX />
                       </button>
-                      {index === 0 && <span className="primary-badge">Primary</span>}
+                      {index === 0 && (
+                        <span className="primary-badge">Primary</span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -500,7 +525,7 @@ const ProductEdit = () => {
             </div>
           </div>
         )}
-        
+
         <div className="form-actions">
           <Link to="/admin/products" className="cancel-btn">
             Cancel
@@ -510,7 +535,7 @@ const ProductEdit = () => {
           </button>
         </div>
       </form>
-      
+
       {showDeleteModal && (
         <div className="delete-modal-overlay">
           <div className="delete-modal">
@@ -519,21 +544,24 @@ const ProductEdit = () => {
               <h3>Delete Product</h3>
             </div>
             <div className="modal-body">
-              <p>Are you sure you want to delete this product? This action cannot be undone.</p>
+              <p>
+                Are you sure you want to delete this product? This action cannot
+                be undone.
+              </p>
               <div className="product-info">
                 Product: <strong>{formData.name}</strong>
               </div>
             </div>
             <div className="modal-actions">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="cancel-btn"
                 onClick={() => setShowDeleteModal(false)}
               >
                 Cancel
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="confirm-btn"
                 onClick={handleDelete}
               >
@@ -544,7 +572,7 @@ const ProductEdit = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ProductEdit
+export default ProductEdit;

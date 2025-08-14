@@ -1,20 +1,32 @@
 import { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AuthContext } from '../../../App'
 import './Login.scss'
+import { loginApi } from '../../api/Login'
+import { toast } from 'react-toastify'
 
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const { login } = useContext(AuthContext)
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (email === 'admin@kanakku.com' && password === 'admin123') {
-      login()
-      navigate('/admin')
+    if (email && password) {
+      loginApi({ email, password })
+        .then((data) => {
+          if (data && data.token) {
+            console.log(data);
+            localStorage.setItem('token', data.token)
+            toast.success('Login successful')
+            navigate('/admin')
+          } else {
+            setError('Invalid credentials')
+          }
+        })
+        .catch((err) => {
+          setError('Invalid credentials')
+        })
     } else {
       setError('Invalid credentials')
     }

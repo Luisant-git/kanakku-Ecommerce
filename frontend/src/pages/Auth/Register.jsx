@@ -1,22 +1,23 @@
-import { useState, useContext } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { UserContext } from '../../App'
 import './Auth.scss'
+import { userRegisterApi } from '../../api/Auth'
 
 const Register = () => {
-  const [name, setName] = useState('')
+  // const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { register } = useContext(UserContext)
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await register({ name, email, password })
-      navigate('/account')
+      const response = await userRegisterApi({ email, password })
+      if (response && response.token) {
+        navigate('/login')
+      }
     } catch (error) {
-      // Error is already handled in the context
+      console.log(error)
     }
   }
 
@@ -27,7 +28,7 @@ const Register = () => {
           <h1>Register</h1>
           
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
+            {/* <div className="form-group">
               <label htmlFor="name">Full Name</label>
               <input
                 type="text"
@@ -36,7 +37,7 @@ const Register = () => {
                 onChange={(e) => setName(e.target.value)}
                 required
               />
-            </div>
+            </div> */}
             
             <div className="form-group">
               <label htmlFor="email">Email</label>

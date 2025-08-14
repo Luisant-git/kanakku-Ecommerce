@@ -1,13 +1,7 @@
 import { Link } from 'react-router-dom'
-import { useContext } from 'react'
-import { CartContext } from '../../App'
 import './OrderConfirmation.scss'
 
 const OrderConfirmation = () => {
-  const { clearCart } = useContext(CartContext)
-
-  // Clear cart when order is confirmed
-  clearCart()
 
   return (
     <div className="order-confirmation">

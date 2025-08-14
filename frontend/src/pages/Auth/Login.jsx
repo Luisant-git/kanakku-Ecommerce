@@ -1,21 +1,25 @@
 import { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { UserContext } from '../../App'
 import './Auth.scss'
+import { userLoginApi } from '../../api/Auth'
 
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { login } = useContext(UserContext)
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await login({ email, password })
-      navigate('/account')
+      const response = await userLoginApi({ email, password })
+      if (response && response.token) {
+        localStorage.setItem('token', response.token)
+        navigate('/')
+      } else {
+        console.error('Login failed:', response.message)
+      }
     } catch (error) {
-      // Error is already handled in the context
+      console.error('Login failed:', error.message)
     }
   }
 

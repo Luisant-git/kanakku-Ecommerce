@@ -1,46 +1,73 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { FiArrowLeft, FiSave, FiUpload, FiX } from 'react-icons/fi'
-import './ProductAdd.scss'
+import { useState } from "react";
+import uploadImageApi from "../../api/Upload";
+import { createProductApi, getAllProductsApi } from '../../api/Product';
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { FiArrowLeft, FiSave, FiUpload, FiX } from "react-icons/fi";
+import "./ProductAdd.scss";
 
 const ProductAdd = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: 'software',
-    stock: '',
-    status: 'active',
-    image: null
-  })
-  
-  const [imagePreview, setImagePreview] = useState(null)
+    name: "",
+    description: "",
+    price: "",
+    imageUrl: [], // array of files
+  });
+  const [imagePreview, setImagePreview] = useState([]); // array of previews
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
-  
-  const handleImageChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setFormData(prev => ({ ...prev, image: file }))
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
+      [name]: value,
+    }));
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Submit logic here
-    console.log('Product added:', formData)
-  }
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setFormData((prev) => ({ ...prev, imageUrl: files }));
+
+    // Read all files and set previews
+    Promise.all(
+      files.map(
+        (file) =>
+          new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(file);
+          })
+      )
+    ).then((images) => setImagePreview(images));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    let imageUrls = [];
+    if (formData.imageUrl && formData.imageUrl.length > 0) {
+      const imageData = new FormData();
+      formData.imageUrl.forEach((file) => imageData.append("files", file));
+      const uploadRes = await uploadImageApi(imageData);
+      if (uploadRes && uploadRes.urls) {
+        imageUrls = uploadRes.urls;
+      }
+    }
+    const productPayload = {
+      name: formData.name,
+      description: formData.description,
+      price: parseFloat(formData.price),
+      imageUrl: imageUrls,
+    };
+    const res = await createProductApi(productPayload);
+    setLoading(false);
+    if (res && res.id) {
+      navigate("/admin/products");
+    } else {
+      alert("Error creating product");
+    }
+  };
 
   return (
     <div className="product-add-page">
@@ -51,13 +78,15 @@ const ProductAdd = () => {
         <h1>Add Product</h1>
         <p>Create a new product for your store</p>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="product-form">
         <div className="form-section">
           <h2 className="section-title">Basic Information</h2>
-          
+
           <div className="form-group">
-            <label>Product Name <span className="required">*</span></label>
+            <label>
+              Product Name <span className="required">*</span>
+            </label>
             <input
               type="text"
               name="name"
@@ -67,7 +96,7 @@ const ProductAdd = () => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label>Description</label>
             <textarea
@@ -78,8 +107,8 @@ const ProductAdd = () => {
               rows="4"
             />
           </div>
-          
-          <div className="form-row">
+
+          {/* <div className="form-row">
             <div className="form-group">
               <label>Category <span className="required">*</span></label>
               <select
@@ -108,47 +137,59 @@ const ProductAdd = () => {
             <select name="brand">
               <option value="">Select Brand</option>
             </select>
-          </div>
+          </div> */}
         </div>
-        
+
         <div className="form-section image-section">
           <h2 className="section-title">Product Images</h2>
-          
+
           <div className="image-upload">
             <input
               type="file"
               accept="image/*"
+              multiple
               onChange={handleImageChange}
               className="file-input"
             />
             <FiUpload className="upload-icon" />
             <div className="upload-text">Click to upload images</div>
             <div className="upload-subtext">PNG, JPG, GIF up to 10MB</div>
-            
-            {imagePreview && (
-              <div className="image-preview">
-                <img src={imagePreview} alt="Preview" />
-                <button 
-                  type="button" 
-                  className="remove-image"
-                  onClick={() => {
-                    setImagePreview(null)
-                    setFormData(prev => ({ ...prev, image: null }))
-                  }}
-                >
-                  <FiX />
-                </button>
+
+            {imagePreview.length > 0 && (
+              <div className="image-preview-list">
+                {imagePreview.map((preview, idx) => (
+                  <div className="image-preview" key={idx}>
+                    <img src={preview} alt={`Preview ${idx + 1}`} />
+                    <button
+                      type="button"
+                      className="remove-image"
+                      onClick={() => {
+                        setImagePreview((prev) =>
+                          prev.filter((_, i) => i !== idx)
+                        );
+                        setFormData((prev) => ({
+                          ...prev,
+                          imageUrl: prev.imageUrl.filter((_, i) => i !== idx),
+                        }));
+                      }}
+                    >
+                      <FiX />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         </div>
-        
+
         <div className="form-section">
           <h2 className="section-title">Pricing & Inventory</h2>
-          
+
           <div className="form-row">
             <div className="form-group">
-              <label>Price <span className="required">*</span></label>
+              <label>
+                Price <span className="required">*</span>
+              </label>
               <input
                 type="number"
                 step="0.01"
@@ -159,8 +200,8 @@ const ProductAdd = () => {
                 required
               />
             </div>
-            
-            <div className="form-group">
+
+            {/* <div className="form-group">
               <label>Stock</label>
               <input
                 type="number"
@@ -169,10 +210,10 @@ const ProductAdd = () => {
                 value={formData.stock}
                 onChange={handleChange}
               />
-            </div>
+            </div> */}
           </div>
-          
-          <div className="form-group">
+
+          {/* <div className="form-group">
             <label>Status</label>
             <select
               name="status"
@@ -183,9 +224,9 @@ const ProductAdd = () => {
               <option value="inactive">Inactive</option>
               <option value="draft">Draft</option>
             </select>
-          </div>
+          </div> */}
         </div>
-        
+
         <div className="form-actions">
           <Link to="/admin/products" className="cancel-btn">
             Cancel
@@ -196,7 +237,7 @@ const ProductAdd = () => {
         </div>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default ProductAdd
+export default ProductAdd;
