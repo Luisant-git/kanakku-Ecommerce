@@ -22,4 +22,39 @@ const getAllOrderApi = async () => {
   }
 };
 
-export { getAllOrderApi ,getAuthHeaders}
+const getOrderByIdApi = async (orderId) => {
+  try {
+    const response = await fetch(`${apiUrl}/orders/${orderId}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  } catch (error) {
+    console.error("Error getting order:", error);
+  }
+};
+
+const updateOrderApi = async (orderId, orderData) => {
+  try {
+    const response = await fetch(`${apiUrl}/orders/${orderId}`, {
+      method: "PATCH",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating order:", error);
+    throw error;
+  }
+};
+
+
+export { getAllOrderApi , getOrderByIdApi, updateOrderApi , getAuthHeaders}

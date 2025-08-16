@@ -47,9 +47,9 @@ const Customers = () => {
     <div className="customers-page">
       <div className="page-header">
         <h1>Customers</h1>
-        <button className="add-customer-btn" onClick={() => navigate('/admin/customers/add')}>
+        {/* <button className="add-customer-btn" onClick={() => navigate('/admin/customers/add')}>
           <FiUserPlus /> Add Customer
-        </button>
+        </button> */}
       </div>
       <DataTable data={customers} columns={columns} />
     </div>

@@ -21,7 +21,7 @@ const ProductCard = ({ product }) => {
           <span className="product-card__price">
             ₹{product.price.toLocaleString()}
           </span>
-          <button className="btn btn--small">Add to Cart</button>
+          <button className="btn btn--small">View Detail</button>
         </div>
       </Link>
     </div>

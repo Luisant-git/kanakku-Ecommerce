@@ -244,4 +244,74 @@ export class OrderService {
       where: { id },
     });
   }
+
+  async totalOrders() {
+    return this.prisma.order.count();
+  }
+  
+  //calculate only status completed orders sales amount
+  async totalSales() {
+    const completedOrders = await this.prisma.order.findMany({
+      where: { status: 'COMPLETED' },
+    });
+
+    let totalSales = 0;
+    completedOrders.forEach((order) => {
+      totalSales += order.total;
+    });
+
+    return totalSales;
+  }
+
+  // total pending orders
+  async totalPendingOrders() {
+    return this.prisma.order.count({
+      where: { status: 'PENDING' },
+    });
+  }
+
+  async totalCompletedOrders() {
+    return this.prisma.order.count({
+      where: { status: 'COMPLETED' },
+    });
+  }
+
+  async totalCancelledOrders() {
+    return this.prisma.order.count({
+      where: { status: 'CANCELLED' },
+    });
+  }
+
+
+ //total Revenue By Month Of CurrentYear, if not that month started send as null
+  async totalRevenueByMonthOfCurrentYear() {
+    const currentYear = new Date().getFullYear();
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+    const revenueByMonth = await Promise.all(
+      months.map(async (month) => {
+        const startOfMonth = new Date(currentYear, month - 1, 1);
+        const endOfMonth = new Date(currentYear, month, 0);
+
+        const completedOrders = await this.prisma.order.findMany({
+          where: {
+            status: 'COMPLETED',
+            createdAt: {
+              gte: startOfMonth,
+              lte: endOfMonth,
+            },
+          },
+        });
+
+        let totalRevenue = 0;
+        completedOrders.forEach((order) => {
+          totalRevenue += order.total;
+        });
+
+        return totalRevenue;
+      }),
+    );
+
+    return revenueByMonth;
+  }
 }

@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { Line, Doughnut } from 'react-chartjs-2'
 import '../../../utils/chartSetup'
 import ChartCard from '../../components/ChartCard/ChartCard'
 import StatsCard from '../../components/StatsCard/StatsCard'
 import { FiSearch, FiBell, FiCalendar, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import './Dashboard.scss'
+import { getCancelledOrdersApi, getCompletedOrdersApi, getPendingOrdersApi, getTotalCustomersApi, getTotalOrdersApi, getTotalRevenueApi } from '../../api/Dashboard'
+import { useEffect } from 'react'
 
 // --- Product Card Component ---
 const ProductCard = ({ image, name, quantity }) => {
@@ -19,11 +22,77 @@ const ProductCard = ({ image, name, quantity }) => {
 }
 
 const Dashboard = () => {
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalCustomers, setTotalCustomers] = useState(0);
+  const [pendingOrders, setPendingOrders] = useState(0);
+  const [completedOrders, setCompletedOrders] = useState(0);
+  const [cancelledOrders, setCancelledOrders] = useState(0);
+  const getTotalRevenue = async () => {
+    try {
+      const response = await getTotalRevenueApi();
+      setTotalRevenue(response);
+    } catch (error) {
+      console.error('Error fetching total revenue:', error);
+      return 0;
+    }
+  };
+
+  const getTotalOrders = async () => {
+    try {
+      const response = await getTotalOrdersApi();
+      setTotalOrders(response)
+    } catch (error) {
+      console.error('Error fetching total orders:', error);
+      return 0;
+    }
+  };
+
+  const getTotalCustomers = async () => {
+    try {
+      const response = await getTotalCustomersApi();
+      setTotalCustomers(response)
+    } catch (error) {
+      console.error('Error fetching total customers:', error);
+      return 0;
+    }
+  };
+
+  const getPendingOrders = async () => {
+    try {
+      const response = await getPendingOrdersApi();
+      setPendingOrders(response)
+    } catch (error) {
+      console.error('Error fetching pending orders:', error);
+      return 0;
+    }
+  };
+
+  const getCompletedOrders = async () => {
+    try {
+      const response = await getCompletedOrdersApi();
+      setCompletedOrders(response)
+    } catch (error) {
+      console.error('Error fetching completed orders:', error);
+      return 0;
+    }
+  };
+
+  const getCancelledOrders = async () => {
+    try {
+      const response = await getCancelledOrdersApi();
+      setCancelledOrders(response)
+    } catch (error) {
+      console.error('Error fetching cancelled orders:', error);
+      return 0;
+    }
+  };
+
   const salesData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     datasets: [{
       label: 'Sales',
-      data: [4000, 3000, 5000, 2780, 1890, 2390],
+      data: [2000, 4000, 2000, 2080, 3490, 4990, 4000, 1000, 2000, 3780, 5490, 7000],
       borderColor: 'rgba(79, 70, 229, 1)',
       backgroundColor: 'rgba(79, 70, 229, 0.1)',
       tension: 0.4
@@ -31,14 +100,13 @@ const Dashboard = () => {
   }
 
   const targetData = {
-    labels: ['Achieved', 'Remaining', 'Pending', 'Completed'],
+    labels: ['Pending', 'Completed', 'Cancelled'],
     datasets: [{
-      data: [45, 25, 20, 10],
+      data: [ pendingOrders , completedOrders, cancelledOrders],
       backgroundColor: [
         'rgba(79, 70, 229, 0.8)',
         'rgba(16, 185, 129, 0.8)',
-        'rgba(59, 130, 246, 0.8)',
-        'rgba(245, 158, 11, 0.8)'
+        'rgba(240, 53, 53, 0.8)',
       ]
     }]
   }
@@ -50,6 +118,15 @@ const Dashboard = () => {
     { image: 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=150&h=150&fit=crop', name: 'Lenovo ThinkPad', quantity: '38 Pcs' },
     { image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=150&h=150&fit=crop', name: 'ASUS VivoBook', quantity: '25 Pcs' }
   ]
+
+  useEffect(() => {
+    getTotalRevenue();
+    getTotalOrders();
+    getTotalCustomers();
+    getPendingOrders();
+    getCompletedOrders();
+    getCancelledOrders();
+  }, [])
 
   return (
     <div className="dashboard">
@@ -71,10 +148,10 @@ const Dashboard = () => {
       </div>
       
       <div className="stats-grid">
-        <StatsCard title="Total Revenue" value="$250,430" change="+15.3%" color="primary" />
-        <StatsCard title="Total Orders" value="8,249" change="+8.1%" color="secondary" />
-        <StatsCard title="Total Customers" value="1,324" change="-2.1%" color="info" />
-        <StatsCard title="Pending Delivery" value="89" change="+12.5%" color="warning" />
+        <StatsCard title="Total Revenue" value={totalRevenue} change="+15.3%" color="primary" />
+        <StatsCard title="Total Orders" value={totalOrders} change="+8.1%" color="secondary" />
+        <StatsCard title="Total Customers" value={totalCustomers} change="-2.1%" color="info" />
+        <StatsCard title="Pending Delivery" value={pendingOrders} change="+12.5%" color="warning" />
       </div>
 
       <div className="chart-grid">

@@ -1,8 +1,9 @@
-import { Controller, Post, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Post, Body, Request, Get, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { UserRegisterDto, AdminRegisterDto } from './dto/user-register.dto';
 import { UserLoginDto, AdminLoginDto } from './dto/user-login.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -41,5 +42,35 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async adminLogin(@Body() adminLoginDto: AdminLoginDto) {
     return this.authService.adminLogin(adminLoginDto);
+  }
+
+  @Get('customer/count')
+  @ApiOperation({ summary: 'Get user count' })
+  @ApiResponse({ status: 200, description: 'User count retrieved successfully.' })
+  async getUserCount() {
+    return this.authService.getUserCount();
+  }
+
+  @Get('user/profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Get user profile' })
+  @ApiResponse({ status: 200, description: 'User profile retrieved successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async getUserProfile(@Request() req) {
+    const userId = req.user.userId;
+    return this.authService.getUserProfile(userId);
+  }
+
+  @Get('admin/profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Get admin profile' })
+  @ApiResponse({ status: 200, description: 'Admin profile retrieved successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async getAdminProfile(@Request() req) {
+    console.log('Decoded user:', req.user); 
+    const adminId = Number(req.user?.adminId);
+    return this.authService.getAdminProfile(Number(adminId));
   }
 }
