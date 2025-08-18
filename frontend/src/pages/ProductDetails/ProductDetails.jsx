@@ -59,7 +59,7 @@ const ProductDetails = () => {
             {/* <span className="product-details__category">{product.category}</span> */}
             <span className="product-details__price">₹{product.price}</span>
 
-            <div className="product-details__quantity">
+            {/* <div className="product-details__quantity">
               <label htmlFor="quantity">Quantity:</label>
               <input
                 type="number"
@@ -69,7 +69,7 @@ const ProductDetails = () => {
                 onChange={handleQuantityChange}
                 disabled
               />
-            </div>
+            </div> */}
 
             <button className="btn btn--primary" onClick={()=>handleAddToCart(product)}>Add to Cart</button>
 

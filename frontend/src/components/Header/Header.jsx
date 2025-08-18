@@ -43,7 +43,7 @@ const Header = () => {
               <li><Link to="/products" onClick={closeMenu}>Products</Link></li>
               <li><Link to="/about" onClick={closeMenu}>About Us</Link></li>
               <li><Link to="/contact" onClick={closeMenu}>Contact</Link></li>
-              <li><Link to="/cart" className="cart-link" onClick={closeMenu}>Cart {cartCount}</Link></li>
+              <li><Link to="/cart" style={{ padding: '10px 40px'}} className="cart-link" onClick={closeMenu}>Cart</Link></li>
             </ul>
           </nav>
         </div>

@@ -9,10 +9,10 @@ import { toast } from 'react-toastify';
 const Checkout = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
+    // firstName: '',
+    // lastName: '',
+    // email: '',
+    // phone: '',
     address: '',
     city: '',
     state: '',
@@ -61,28 +61,28 @@ const Checkout = () => {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-      toast.error('First name is required');
-    }
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-      toast.error('Last name is required');
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-      toast.error('Email is required');
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-      toast.error('Email is invalid');
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone is required';
-      toast.error('Phone is required');
-    } else if (!/^\d{10}$/.test(formData.phone)) {
-      newErrors.phone = 'Phone must be 10 digits';
-      toast.error('Phone must be 10 digits');
-    }
+    // if (!formData.firstName.trim()) {
+    //   newErrors.firstName = 'First name is required';
+    //   toast.error('First name is required');
+    // }
+    // if (!formData.lastName.trim()) {
+    //   newErrors.lastName = 'Last name is required';
+    //   toast.error('Last name is required');
+    // }
+    // if (!formData.email.trim()) {
+    //   newErrors.email = 'Email is required';
+    //   toast.error('Email is required');
+    // } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    //   newErrors.email = 'Email is invalid';
+    //   toast.error('Email is invalid');
+    // }
+    // if (!formData.phone.trim()) {
+    //   newErrors.phone = 'Phone is required';
+    //   toast.error('Phone is required');
+    // } else if (!/^\d{10}$/.test(formData.phone)) {
+    //   newErrors.phone = 'Phone must be 10 digits';
+    //   toast.error('Phone must be 10 digits');
+    // }
     if (!formData.address.trim()) {
       newErrors.address = 'Address is required';
       toast.error('Address is required');
@@ -159,7 +159,7 @@ const Checkout = () => {
         <div className="checkout-content">
           <form onSubmit={handleSubmit} className="checkout-form">
             <h2>Shipping Information</h2>
-            <div className="form-row">
+            {/* <div className="form-row">
               <div className="form-group">
                 <label htmlFor="firstName">First Name</label>
                 <input 
@@ -182,9 +182,9 @@ const Checkout = () => {
                   required 
                 />
               </div>
-            </div>
+            </div> */}
 
-            <div className="form-row">
+            {/* <div className="form-row">
               <div className="form-group">
                 <label htmlFor="email">Email</label>
                 <input 
@@ -207,7 +207,7 @@ const Checkout = () => {
                   required 
                 />
               </div>
-            </div>
+            </div> */}
 
             <div className="form-group">
               <label htmlFor="address">Address</label>
@@ -319,7 +319,7 @@ const Checkout = () => {
             <div className="summary-items">
               {cartItems.map((item) => (
                   <div key={item._id} className="summary-item">
-                    <span>{item.product.name} × 1</span>
+                    <span>{item.product.name}</span>
                     <span>₹{item.product.price}</span>
                   </div>
                 ))}

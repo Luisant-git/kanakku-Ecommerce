@@ -64,7 +64,7 @@ const Cart = () => {
                     <h3>{item.product.name}</h3>
                     <span className="cart-item__price">₹{item.product.price}</span>
                   </div>
-                  <div className="cart-item__quantity">
+                  {/* <div className="cart-item__quantity">
                     <input
                       type="number"
                       min="1"
@@ -72,7 +72,7 @@ const Cart = () => {
                       readOnly
                       disabled
                     />
-                  </div>
+                  </div> */}
                   <div className="cart-item__total">
                     ₹{item.product.price}
                   </div>
