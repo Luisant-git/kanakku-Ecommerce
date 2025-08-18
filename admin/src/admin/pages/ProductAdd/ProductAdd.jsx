@@ -4,6 +4,7 @@ import { createProductApi, getAllProductsApi } from '../../api/Product';
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { FiArrowLeft, FiSave, FiUpload, FiX } from "react-icons/fi";
+import { toast } from "react-toastify";
 import "./ProductAdd.scss";
 
 const ProductAdd = () => {
@@ -27,11 +28,26 @@ const ProductAdd = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setFormData((prev) => ({ ...prev, imageUrl: files }));
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    
+    // Filter out files larger than 2MB
+    const validFiles = files.filter(file => {
+      if (file.size > maxSize) {
+        toast.error(`Image "${file.name}" exceeds 2MB limit. Please select a smaller image.`);
+        return false;
+      }
+      return true;
+    });
 
-    // Read all files and set previews
+    if (validFiles.length === 0) {
+      return; // No valid files selected
+    }
+
+    setFormData((prev) => ({ ...prev, imageUrl: validFiles }));
+
+    // Read all valid files and set previews
     Promise.all(
-      files.map(
+      validFiles.map(
         (file) =>
           new Promise((resolve) => {
             const reader = new FileReader();
@@ -153,7 +169,7 @@ const ProductAdd = () => {
             />
             <FiUpload className="upload-icon" />
             <div className="upload-text">Click to upload images</div>
-            <div className="upload-subtext">PNG, JPG, GIF up to 10MB</div>
+            <div className="upload-subtext">PNG, JPG, GIF up to 2MB</div>
 
             {imagePreview.length > 0 && (
               <div className="image-preview-list">
