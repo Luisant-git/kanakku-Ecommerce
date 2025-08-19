@@ -39,8 +39,8 @@ function App() {
           <Route path="customers" element={<Customers />} />
           <Route path="customers/add" element={<CustomerAdd />} />
           <Route path="customers/:id" element={<CustomerDetails />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="settings" element={<Settings />} />
+          {/* <Route path="analytics" element={<Analytics />} />
+          <Route path="settings" element={<Settings />} /> */}
         </Route>
         <Route path="*" element={<Navigate to="/admin" />} />
       </Routes>

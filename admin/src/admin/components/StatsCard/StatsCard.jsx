@@ -1,11 +1,12 @@
-import { FiDollarSign, FiShoppingBag, FiUsers, FiPieChart } from 'react-icons/fi'
+import { FaRupeeSign } from 'react-icons/fa'
+import { FiShoppingBag, FiUsers, FiPieChart } from 'react-icons/fi'
 import './StatsCard.scss'
 
 const StatsCard = ({ title, value, change, icon, color }) => {
   const getIcon = () => {
     switch (icon) {
-      case 'dollar':
-        return <FiDollarSign />
+      case 'rupee':
+        return <FaRupeeSign />
       case 'bag':
         return <FiShoppingBag />
       case 'users':
@@ -13,7 +14,7 @@ const StatsCard = ({ title, value, change, icon, color }) => {
       case 'chart':
         return <FiPieChart />
       default:
-        return <FiDollarSign />
+        return <FaRupeeSign />
     }
   }
 
@@ -25,9 +26,9 @@ const StatsCard = ({ title, value, change, icon, color }) => {
       <div className="content">
         <h3>{title}</h3>
         <p className="value">{value}</p>
-        <p className={`change ${isPositive ? 'positive' : 'negative'}`}>
+        {/* <p className={`change ${isPositive ? 'positive' : 'negative'}`}>
           {change}
-        </p>
+        </p> */}
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./ProductDetails.scss";
 import { getProductByIdApi } from "../../api/Product";
@@ -10,6 +10,7 @@ const ProductDetails = () => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState({});
+  const navigate = useNavigate();
 
   const getProductById = async (id) => {
     const response = await getProductByIdApi(parseInt(id));
@@ -71,7 +72,7 @@ const ProductDetails = () => {
               />
             </div> */}
 
-            <button className="btn btn--primary" onClick={()=>handleAddToCart(product)}>Add to Cart</button>
+            <button className="btn btn--primary" onClick={async ()=> {await handleAddToCart(product); navigate('/cart')}}>Add to Cart</button>
 
             <div className="product-details__description">
               <h3>Description</h3>

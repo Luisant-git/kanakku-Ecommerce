@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
-import { FiHome, FiShoppingBag, FiUsers, FiPieChart, FiSettings, FiDollarSign, FiX } from 'react-icons/fi'
+import { FaRupeeSign } from 'react-icons/fa'
+import { FiHome, FiShoppingBag, FiUsers, FiPieChart, FiSettings, FiX } from 'react-icons/fi'
 import kanakkuLogo from '../../../assets/kanakku.png'
 import './Sidebar.scss'
 
@@ -30,7 +31,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           </li>
           <li>
             <NavLink to="/admin/orders">
-              <FiDollarSign />
+              <FaRupeeSign />
               <span>Orders</span>
             </NavLink>
           </li>
@@ -40,7 +41,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               <span>Customers</span>
             </NavLink>
           </li>
-          <li>
+          {/* <li>
             <NavLink to="/admin/analytics">
               <FiPieChart />
               <span>Analytics</span>
@@ -51,7 +52,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               <FiSettings />
               <span>Settings</span>
             </NavLink>
-          </li>
+          </li> */}
         </ul>
       </nav>
     </aside>

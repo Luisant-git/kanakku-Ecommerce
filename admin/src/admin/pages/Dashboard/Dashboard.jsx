@@ -148,22 +148,22 @@ const Dashboard = () => {
       </div>
       
       <div className="stats-grid">
-        <StatsCard title="Total Revenue" value={totalRevenue} change="+15.3%" color="primary" />
-        <StatsCard title="Total Orders" value={totalOrders} change="+8.1%" color="secondary" />
-        <StatsCard title="Total Customers" value={totalCustomers} change="-2.1%" color="info" />
-        <StatsCard title="Pending Delivery" value={pendingOrders} change="+12.5%" color="warning" />
+        <StatsCard title="Total Revenue" icon='rupee' value={totalRevenue} change="+15.3%" color="primary" />
+        <StatsCard title="Total Orders" icon='bag' value={totalOrders} change="+8.1%" color="secondary" />
+        <StatsCard title="Total Customers" icon='users' value={totalCustomers} change="-2.1%" color="info" />
+        <StatsCard title="Pending Delivery" icon='chart' value={pendingOrders} change="+12.5%" color="warning" />
       </div>
 
-      <div className="chart-grid">
+      {/* <div className="chart-grid">
         <ChartCard title="Sales Overview">
           <Line data={salesData} options={{ responsive: true, maintainAspectRatio: false }} />
         </ChartCard>
         <ChartCard title="Sales Target">
           <Doughnut data={targetData} options={{ responsive: true, maintainAspectRatio: false }} />
         </ChartCard>
-      </div>
+      </div> */}
 
-      <div className="products-grid">
+      {/* <div className="products-grid">
         <div className="chart-card">
           <div className="card-header">
             <h3>Top Selling Products</h3>
@@ -213,7 +213,7 @@ const Dashboard = () => {
             </div>
           </div>
         </ChartCard>
-      </div>
+      </div> */}
     </div>
   )
 }

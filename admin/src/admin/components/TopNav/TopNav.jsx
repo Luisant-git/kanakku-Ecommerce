@@ -40,10 +40,10 @@ const TopNav = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
       </div>
       <div className="nav-right">
-        <button className="notification-btn">
+        {/* <button className="notification-btn">
           <FiBell />
           <span className="badge">3</span>
-        </button>
+        </button> */}
         <div className="user-profile" ref={profileRef} onClick={() => setDropdownOpen((open) => !open)}>
           <FiUser />
           <span>Admin User</span>
