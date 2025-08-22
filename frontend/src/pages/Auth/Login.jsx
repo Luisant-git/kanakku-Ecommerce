@@ -6,20 +6,22 @@ import { userLoginApi } from '../../api/Auth'
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
     try {
       const response = await userLoginApi({ email, password })
       if (response && response.token) {
         localStorage.setItem('token', response.token)
         navigate('/')
       } else {
-        console.error('Login failed:', response.message)
+        setError(response.message || 'Login failed')
       }
     } catch (error) {
-      console.error('Login failed:', error.message)
+      setError('Login failed. Please try again.')
     }
   }
 
@@ -28,6 +30,12 @@ const Login = () => {
       <div className="container">
         <div className="auth-card">
           <h1>Login</h1>
+          
+          {error && (
+            <div className="message error">
+              {error}
+            </div>
+          )}
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
