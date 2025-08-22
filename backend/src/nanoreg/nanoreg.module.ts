@@ -7,5 +7,6 @@ import { MysqlModule } from 'src/database/mysql.module';
   imports: [MysqlModule],
   controllers: [NanoregController],
   providers: [NanoregService],
+  exports: [NanoregService],
 })
 export class NanoregModule {}

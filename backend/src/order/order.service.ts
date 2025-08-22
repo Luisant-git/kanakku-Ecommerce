@@ -3,12 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { CartService } from '../cart/cart.service';
+import { NanoregService } from '../nanoreg/nanoreg.service';
 
 @Injectable()
 export class OrderService {
   constructor(
     private prisma: PrismaService,
     private cartService: CartService,
+    private nanoregService: NanoregService,
   ) {}
 
   // async create(userId: number, createOrderDto: CreateOrderDto) {
@@ -132,6 +134,16 @@ export class OrderService {
       await this.prisma.cartItem.deleteMany({
         where: { cartId: userCart.id },
       });
+    }
+
+    // Send to nanoreg service
+    try {
+      await this.nanoregService.create({
+        Name: order.user.name || undefined,
+        Email: order.user.email || undefined,
+      });
+    } catch (error) {
+      console.error('Failed to send to nanoreg:', error.message);
     }
 
     return {
