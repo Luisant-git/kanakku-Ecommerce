@@ -8,9 +8,10 @@ import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { MysqlModule } from './database/mysql.module';
 import { NanoregModule } from './nanoreg/nanoreg.module';
+import { CustomerModule } from './customer/customer.module';
 
 @Module({
-  imports: [AuthModule, ProductModule, UploadModule, CartModule, OrderModule, MysqlModule, NanoregModule],
+  imports: [AuthModule, ProductModule, UploadModule, CartModule, OrderModule, MysqlModule, NanoregModule, CustomerModule],
   controllers: [AppController],
   providers: [AppService],
 })

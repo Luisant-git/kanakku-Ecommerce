@@ -1,25 +1,37 @@
 import { Link, useParams } from 'react-router-dom'
 import { FiArrowLeft, FiEdit, FiShoppingBag } from 'react-icons/fi'
 import './CustomerDetails.scss'
+import { getCustomerByIdApi } from '../../api/Customer'
+import { useEffect } from 'react'
+import { useState } from 'react'
 
 const CustomerDetails = () => {
   const { id } = useParams()
-  
-  // Sample customer data - in a real app you would fetch this based on the ID
-  const customer = {
-    id: id,
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '+91 9876543210',
-    address: '123 Main St, Salem, Tamil Nadu 636001',
-    joined: '2023-01-15T10:30:00',
-    orders: [
-      { id: 1001, date: '2023-05-15', amount: 5998, status: 'completed' },
-      { id: 1002, date: '2023-04-10', amount: 19900, status: 'completed' },
-      { id: 1003, date: '2023-03-05', amount: 9900, status: 'completed' }
-    ],
-    totalSpent: 35798
+  const [customer, setCustomer] = useState({});
+
+  const getCustomerById = async () =>{
+    const response = await getCustomerByIdApi(id);
+    setCustomer(response);
   }
+
+  useEffect(()=>{
+    getCustomerById();
+  },[])
+  
+  // const customer = {
+  //   id: id,
+  //   name: 'John Doe',
+  //   email: 'john@example.com',
+  //   phone: '+91 9876543210',
+  //   address: '123 Main St, Salem, Tamil Nadu 636001',
+  //   joined: '2023-01-15T10:30:00',
+  //   orders: [
+  //     { id: 1001, date: '2023-05-15', amount: 5998, status: 'completed' },
+  //     { id: 1002, date: '2023-04-10', amount: 19900, status: 'completed' },
+  //     { id: 1003, date: '2023-03-05', amount: 9900, status: 'completed' }
+  //   ],
+  //   totalSpent: 35798
+  // }
 
   return (
     <div className="customer-details-page">
@@ -27,42 +39,39 @@ const CustomerDetails = () => {
         <Link to="/admin/customers" className="back-btn">
           <FiArrowLeft /> Back to Customers
         </Link>
-        <button className="edit-btn">
-          <FiEdit /> Edit Customer
-        </button>
       </div>
       
       <div className="customer-container">
         <div className="customer-profile">
           <div className="profile-header">
             <div className="avatar">
-              {customer.name.charAt(0)}
+              {customer?.name?.charAt(0) || 'U'}
             </div>
             <div className="profile-info">
-              <h2>{customer.name}</h2>
-              <p>{customer.email}</p>
+              <h2>{customer?.name || 'N/A'}</h2>
+              <p>{customer?.email || 'N/A'}</p>
             </div>
           </div>
           
           <div className="profile-details">
             <div className="detail-group">
               <h3>Contact Information</h3>
-              <p><strong>Phone:</strong> {customer.phone}</p>
-              <p><strong>Address:</strong> {customer.address}</p>
+              <p><strong>Phone:</strong> {customer?.phone || 'N/A'}</p>
+              <p><strong>Address:</strong> {customer?.address || 'N/A'}</p>
             </div>
             
             <div className="detail-group">
               <h3>Account Information</h3>
-              <p><strong>Joined:</strong> {new Date(customer.joined).toLocaleString()}</p>
-              <p><strong>Total Orders:</strong> {customer.orders.length}</p>
-              <p><strong>Total Spent:</strong> ₹{customer.totalSpent.toLocaleString()}</p>
+              <p><strong>Joined:</strong> {new Date(customer?.joined).toLocaleString()}</p>
+              <p><strong>Total Orders:</strong> {customer?.orders?.length || '0'}</p>
+              <p><strong>Total Spent:</strong> ₹{customer?.totalSpent?.toLocaleString() || '0'}</p>
             </div>
           </div>
         </div>
         
         <div className="customer-orders">
           <h3>Order History</h3>
-          {customer.orders.length > 0 ? (
+          {customer?.orders?.length > 0 ? (
             <table className="orders-table">
               <thead>
                 <tr>
@@ -74,22 +83,22 @@ const CustomerDetails = () => {
                 </tr>
               </thead>
               <tbody>
-                {customer.orders.map(order => (
+                {customer?.orders?.map(order => (
                   <tr key={order.id}>
                     <td>
-                      <Link to={`/admin/orders/${order.id}`} className="order-link">
-                        #{order.id}
+                      <Link to={`/admin/orders/${order?.id}`} className="order-link">
+                        #{order?.id}
                       </Link>
                     </td>
-                    <td>{new Date(order.date).toLocaleDateString()}</td>
-                    <td>₹{order.amount.toLocaleString()}</td>
+                    <td>{new Date(order?.date).toLocaleDateString()}</td>
+                    <td>₹{order?.amount?.toLocaleString() || '0'}</td>
                     <td>
                       <span className={`status-badge ${order.status}`}>
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        {order?.status?.charAt(0).toUpperCase() + order?.status?.slice(1)}
                       </span>
                     </td>
                     <td>
-                      <Link to={`/admin/orders/${order.id}`} className="view-btn">
+                      <Link to={`/admin/orders/${order?.id}`} className="view-btn">
                         <FiShoppingBag /> View
                       </Link>
                     </td>
