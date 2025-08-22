@@ -6,10 +6,12 @@ import { AuthController } from './auth.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { jwtConstants } from './constant';
 import { JwtStrategy } from './jwt.strategy';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
     PrismaModule,
+    MailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       global: true,

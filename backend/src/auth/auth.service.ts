@@ -1,15 +1,18 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { UserRegisterDto, AdminRegisterDto } from './dto/user-register.dto';
 import { UserLoginDto, AdminLoginDto } from './dto/user-login.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   // User Registration
@@ -175,6 +178,11 @@ export class AuthService {
         id: true,
         email: true,
         name: true,
+        phone: true,
+        address: true,
+        city: true,
+        state: true,
+        pincode: true,
       },
     });
 
@@ -205,5 +213,74 @@ export class AuthService {
   async getUserCount() {
     const count = await this.prisma.user.count();
     return count;
+  }
+
+    async updateUser(userId: number, updateUserDto: UpdateUserDto) {
+    // Check if user exists
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    // Update only provided fields
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...updateUserDto,
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        address: true,
+        city: true,
+        state: true,
+        pincode: true,
+      },
+    });
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const resetToken = this.jwtService.sign(
+      { userId: user.id, email: user.email, type: 'reset' },
+      { secret: process.env.JWT_SECRET, expiresIn: '1h' }
+    );
+
+    await this.mailService.sendPasswordResetEmail(email, resetToken);
+
+    return {
+      message: 'Password reset email sent successfully',
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      const decoded = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
+      
+      if (decoded.type !== 'reset') {
+        throw new UnauthorizedException('Invalid token type');
+      }
+
+      const user = await this.prisma.user.findUnique({ where: { id: decoded.userId } });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      await this.prisma.user.update({
+        where: { id: decoded.userId },
+        data: { password: hashedPassword },
+      });
+
+      return {
+        message: 'Password reset successfully',
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
   }
 }

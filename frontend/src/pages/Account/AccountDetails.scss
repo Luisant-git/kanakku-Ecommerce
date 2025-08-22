@@ -1,0 +1,100 @@
+@import '../../styles/variables';
+
+.account-section {
+  padding: 2rem;
+
+  h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: $primary-color;
+  }
+
+  .profile-form {
+    margin-top: 1rem;
+
+    .form-group {
+      margin-bottom: 1rem;
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+      }
+
+      input, textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 0.25rem;
+      }
+
+      input[type="tel"] {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 0.25rem;
+      }
+
+      textarea {
+        height: 6rem;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 0.25rem;
+      }
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+
+      .form-group {
+        flex-basis: 48%;
+        margin-right: 2%;
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+
+    .form-actions {
+      margin-top: 1rem;
+      text-align: right;
+      padding: 2rem 0 0 0;
+      
+      button {
+        margin-left: 0.5rem;
+      }
+
+      button[type="submit"] {
+        background-color: $primary-color;
+        color: #fff;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+
+      button[type="button"] {
+        background-color: #fff;
+        color: $primary-color;
+        border: 1px solid $primary-color;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
