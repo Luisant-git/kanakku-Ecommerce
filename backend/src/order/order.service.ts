@@ -36,7 +36,7 @@ export class OrderService {
         paymentMethod,
         items: {
           create: await Promise.all(
-            cart.items.map(async (item) => {
+            cart.items.map(async (item: any) => {
               const { price, isRenewal } = await this.purchaseHistoryService.calculatePrice(userId, item.productId);
               return {
                 productId: item.productId,

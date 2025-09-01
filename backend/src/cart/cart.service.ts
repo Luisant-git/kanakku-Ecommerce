@@ -58,7 +58,7 @@ export class CartService {
 
     // Calculate subtotal with renewal pricing
     let subtotal = 0;
-    const itemsWithPricing = [];
+    const itemsWithPricing: any[] = [];
     
     for (const item of cart.items) {
       const { price, isRenewal } = await this.purchaseHistoryService.calculatePrice(userId, item.productId);
