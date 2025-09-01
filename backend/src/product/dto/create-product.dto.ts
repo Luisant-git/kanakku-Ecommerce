@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber } from 'class-validator';
+import { PaymentRenewal } from '@prisma/client';
 
 export class CreateProductDto {
   @ApiProperty({ example: 'Product Name' })
@@ -19,4 +20,24 @@ export class CreateProductDto {
 
   @ApiProperty({ example: 100.0 })
   price: number;
+
+  @ApiProperty({ example: 50.0, required: false })
+  @IsOptional()
+  @IsNumber()
+  priceRenewal?: number;
+
+  @ApiProperty({ example: 'https://example.com/product', required: false })
+  @IsOptional()
+  @IsString()
+  productSource?: string;
+
+  @ApiProperty({ example: 'url', required: false })
+  @IsOptional()
+  @IsString()
+  productSourceType?: string;
+
+  @ApiProperty({ example: 'ONE_TIME', enum: PaymentRenewal, required: false })
+  @IsOptional()
+  @IsEnum(PaymentRenewal)
+  paymentRenewal?: PaymentRenewal;
 }

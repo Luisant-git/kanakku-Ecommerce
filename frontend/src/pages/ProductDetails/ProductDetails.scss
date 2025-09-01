@@ -29,6 +29,57 @@
     }
   }
 
+  &__badges {
+    margin-bottom: 1rem;
+    
+    .badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      
+      &--one {
+        background: #e6fffa;
+        color: #047857;
+      }
+      
+      &--monthly {
+        background: #fef3c7;
+        color: #d97706;
+      }
+      
+      &--yearly {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    
+    .btn {
+      flex: 1;
+      text-align: center;
+      text-decoration: none;
+      
+      &--outline {
+        background: transparent;
+        border: 2px solid $primary-color;
+        color: $primary-color;
+        
+        &:hover {
+          background: $primary-color;
+          color: white;
+        }
+      }
+    }
+  }
+
   &__category {
     display: block;
     color: $primary-color;
@@ -36,12 +87,39 @@
     font-weight: 500;
   }
 
+  &__pricing {
+    margin-bottom: 1.5rem;
+  }
+
   &__price {
     display: block;
     font-size: 1.5rem;
     font-weight: bold;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
     color: $dark-color;
+  }
+
+  &__renewal-price {
+    display: block;
+    font-size: 1.1rem;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .renewal-info {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 3px solid #007bff;
+    
+    .renewal-note {
+      display: block;
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-top: 0.25rem;
+      font-style: italic;
+    }
   }
 
   &__quantity {

@@ -56,10 +56,26 @@
           margin-bottom: 0.5rem;
           font-size: 1.1rem;
         }
+      }
 
-        &__price {
+      &__pricing {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        
+        .cart-item__price {
           color: $primary-color;
           font-weight: 500;
+        }
+        
+        .renewal-badge {
+          background: #e6fffa;
+          color: #047857;
+          padding: 0.2rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
         }
       }
 

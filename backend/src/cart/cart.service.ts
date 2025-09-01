@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddToCartDto } from './dto/add-to-cart.dto';
+import { PurchaseHistoryService } from '../order/purchase-history.service';
 
 @Injectable()
 export class CartService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private purchaseHistoryService: PurchaseHistoryService
+  ) {}
 
   async addToCart(userId: number, dto: AddToCartDto) {
     let cart = await this.prisma.cart.findFirst({ where: { userId } });
@@ -52,11 +56,19 @@ export class CartService {
       };
     }
 
-    // Calculate subtotal
-    const subtotal = cart.items.reduce((sum, item) => {
-      const price = item.product?.price || 0;
-      return sum + price * item.quantity;
-    }, 0);
+    // Calculate subtotal with renewal pricing
+    let subtotal = 0;
+    const itemsWithPricing = [];
+    
+    for (const item of cart.items) {
+      const { price, isRenewal } = await this.purchaseHistoryService.calculatePrice(userId, item.productId);
+      subtotal += price * item.quantity;
+      itemsWithPricing.push({
+        ...item,
+        effectivePrice: price,
+        isRenewal
+      });
+    }
 
     // Example tax rate: 10%
     const taxRate = 0.1;
@@ -66,6 +78,7 @@ export class CartService {
 
     return {
       ...cart,
+      items: itemsWithPricing,
       subtotal,
       tax,
       total,

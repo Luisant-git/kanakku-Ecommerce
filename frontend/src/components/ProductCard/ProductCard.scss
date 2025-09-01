@@ -42,6 +42,34 @@
     }
   }
 
+  &__badges {
+    margin-bottom: 0.5rem;
+    
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      
+      &--one {
+        background: #e6fffa;
+        color: #047857;
+      }
+      
+      &--monthly {
+        background: #fef3c7;
+        color: #d97706;
+      }
+      
+      &--yearly {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+    }
+  }
+
   &__category {
     display: block;
     font-size: 0.8rem;
@@ -49,11 +77,22 @@
     margin-bottom: 0.5rem;
   }
 
+  &__pricing {
+    margin-bottom: 1rem;
+  }
+
   &__price {
     display: block;
     font-weight: bold;
     font-size: 1.2rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  &__renewal-price {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
   }
 
   .btn--small {

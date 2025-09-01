@@ -12,7 +12,12 @@ const ProductAdd = () => {
     name: "",
     description: "",
     price: "",
+    priceRenewal: "",
     imageUrl: [], // array of files
+    productSource: "",
+    productSourceFile: null,
+    productSourceType: "url", // "url" or "file"
+    paymentRenewal: "ONE_TIME",
   });
   const [imagePreview, setImagePreview] = useState([]); // array of previews
   const [loading, setLoading] = useState(false);
@@ -62,6 +67,8 @@ const ProductAdd = () => {
     e.preventDefault();
     setLoading(true);
     let imageUrls = [];
+    let productSourceUrl = formData.productSource;
+    
     if (formData.imageUrl && formData.imageUrl.length > 0) {
       const imageData = new FormData();
       formData.imageUrl.forEach((file) => imageData.append("files", file));
@@ -70,18 +77,36 @@ const ProductAdd = () => {
         imageUrls = uploadRes.urls;
       }
     }
+    
+    // Handle file upload for productSource
+    if (formData.productSourceType === 'file' && formData.productSourceFile) {
+      const fileData = new FormData();
+      fileData.append("files", formData.productSourceFile);
+      const uploadRes = await uploadImageApi(fileData);
+      if (uploadRes && uploadRes.urls && uploadRes.urls.length > 0) {
+        productSourceUrl = uploadRes.urls[0].split('/').pop(); // Get just the filename
+      }
+    } else if (formData.productSourceType === 'url') {
+      productSourceUrl = formData.productSource; // Keep the URL as is
+    }
     const productPayload = {
       name: formData.name,
       description: formData.description,
       price: parseFloat(formData.price),
+      priceRenewal: formData.priceRenewal ? parseFloat(formData.priceRenewal) : null,
       imageUrl: imageUrls,
+      productSource: productSourceUrl || null,
+      productSourceType: formData.productSourceType,
+      paymentRenewal: formData.paymentRenewal,
     };
     const res = await createProductApi(productPayload);
     setLoading(false);
     if (res && res.id) {
+      toast.success('Product created successfully');
       navigate("/admin/products");
     } else {
-      alert("Error creating product");
+      console.error('Product creation error:', res);
+      toast.error(res?.message || "Error creating product");
     }
   };
 
@@ -122,6 +147,49 @@ const ProductAdd = () => {
               onChange={handleChange}
               rows="4"
             />
+          </div>
+
+          <div className="form-group">
+            <label>Product Source</label>
+            <div className="source-type-toggle">
+              <label>
+                <input
+                  type="radio"
+                  name="productSourceType"
+                  value="url"
+                  checked={formData.productSourceType === "url"}
+                  onChange={handleChange}
+                />
+                URL
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="productSourceType"
+                  value="file"
+                  checked={formData.productSourceType === "file"}
+                  onChange={handleChange}
+                />
+                File Upload
+              </label>
+            </div>
+            
+            {formData.productSourceType === "url" ? (
+              <input
+                type="url"
+                name="productSource"
+                placeholder="https://example.com/product"
+                value={formData.productSource}
+                onChange={handleChange}
+              />
+            ) : (
+              <input
+                type="file"
+                name="productSourceFile"
+                onChange={(e) => setFormData(prev => ({ ...prev, productSourceFile: e.target.files[0] }))}
+                accept=".pdf,.doc,.docx,.zip,.rar"
+              />
+            )}
           </div>
 
           {/* <div className="form-row">
@@ -217,17 +285,33 @@ const ProductAdd = () => {
               />
             </div>
 
-            {/* <div className="form-group">
-              <label>Stock</label>
+            <div className="form-group">
+              <label>Price Renewal</label>
               <input
                 type="number"
-                name="stock"
-                placeholder="0"
-                value={formData.stock}
+                step="0.01"
+                name="priceRenewal"
+                placeholder="0.00"
+                value={formData.priceRenewal}
                 onChange={handleChange}
               />
-            </div> */}
+            </div>
+
+            <div className="form-group">
+              <label>Payment Renewal</label>
+              <select
+                name="paymentRenewal"
+                value={formData.paymentRenewal}
+                onChange={handleChange}
+              >
+                <option value="ONE_TIME">One Time</option>
+                <option value="MONTHLY">Monthly</option>
+                <option value="YEARLY">Yearly</option>
+              </select>
+            </div>
           </div>
+
+
 
           {/* <div className="form-group">
             <label>Status</label>

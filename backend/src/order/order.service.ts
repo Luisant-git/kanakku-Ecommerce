@@ -4,6 +4,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { CartService } from '../cart/cart.service';
 import { NanoregService } from '../nanoreg/nanoreg.service';
+import { PurchaseHistoryService } from './purchase-history.service';
 
 @Injectable()
 export class OrderService {
@@ -11,6 +12,7 @@ export class OrderService {
     private prisma: PrismaService,
     private cartService: CartService,
     private nanoregService: NanoregService,
+    private purchaseHistoryService: PurchaseHistoryService,
   ) {}
 
   async create(userId: number, createOrderDto: CreateOrderDto) {
@@ -33,11 +35,17 @@ export class OrderService {
         shippingAddress,
         paymentMethod,
         items: {
-          create: cart.items.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.product.price, // use stored price from product
-          })),
+          create: await Promise.all(
+            cart.items.map(async (item) => {
+              const { price, isRenewal } = await this.purchaseHistoryService.calculatePrice(userId, item.productId);
+              return {
+                productId: item.productId,
+                quantity: item.quantity,
+                price,
+                isRenewal,
+              };
+            })
+          ),
         },
       },
       include: {

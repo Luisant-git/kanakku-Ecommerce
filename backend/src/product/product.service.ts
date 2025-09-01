@@ -2,14 +2,20 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { PaymentRenewal } from '@prisma/client';
 
 @Injectable()
 export class ProductService {
   constructor(private prisma: PrismaService) {}
 
   async create(createProductDto: CreateProductDto) {
+    const data = {
+      ...createProductDto,
+      priceRenewal: createProductDto.priceRenewal || null,
+      paymentRenewal: createProductDto.paymentRenewal as PaymentRenewal || PaymentRenewal.ONE_TIME,
+    };
     return this.prisma.product.create({
-      data: createProductDto,
+      data,
     });
   }
 
@@ -40,9 +46,14 @@ export class ProductService {
       throw new NotFoundException(`Product with ID "${id}" not found`);
     }
 
+    const data = {
+      ...updateProductDto,
+      ...(updateProductDto.paymentRenewal && { paymentRenewal: updateProductDto.paymentRenewal as PaymentRenewal }),
+    };
+
     return this.prisma.product.update({
       where: { id },
-      data: updateProductDto,
+      data,
     });
   }
 

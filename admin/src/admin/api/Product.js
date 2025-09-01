@@ -9,9 +9,14 @@ const createProductApi = async (productData) => {
       },
       body: JSON.stringify(productData),
     });
-    return response.json();
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to create product');
+    }
+    return result;
   } catch (error) {
     console.error("Error creating product:", error);
+    return { error: error.message };
   }
 };
 

@@ -13,10 +13,10 @@ const Cart = () => {
   const getCartItems = async () => {
     // API call to fetch cart items
     const response = await getCartApi();
-    setCartItems(response?.items);
-    setSubtotal(response?.subtotal)
-    setTax(response?.tax)
-    setTotal(response?.total)
+    setCartItems(response?.items || []);
+    setSubtotal(response?.subtotal || 0)
+    setTax(response?.tax || 0)
+    setTotal(response?.total || 0)
     console.log(response);
   };
 
@@ -62,7 +62,12 @@ const Cart = () => {
                   </div>
                   <div className="cart-item__info">
                     <h3>{item.product.name}</h3>
-                    <span className="cart-item__price">₹{item.product.price}</span>
+                    <div className="cart-item__pricing">
+                      <span className="cart-item__price">₹{item.effectivePrice || item.product.price}</span>
+                      {item.isRenewal && (
+                        <span className="renewal-badge">Renewal</span>
+                      )}
+                    </div>
                   </div>
                   {/* <div className="cart-item__quantity">
                     <input
@@ -74,7 +79,7 @@ const Cart = () => {
                     />
                   </div> */}
                   <div className="cart-item__total">
-                    ₹{item.product.price}
+                    ₹{item.effectivePrice || item.product.price}
                   </div>
                   <button className="cart-item__remove" onClick={()=>handleRemoveFromCart(item?.product?.id)}>×</button>
                 </div>

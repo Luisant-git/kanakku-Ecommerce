@@ -29,6 +29,12 @@ const ProductDetails = () => {
     }
   };
 
+  const checkRenewalStatus = async () => {
+    // This would be called from a new API endpoint
+    // For now, we'll show renewal info if priceRenewal exists
+    return product.priceRenewal ? true : false;
+  };
+
   const handleQuantityChange = (e) => {
     const value = parseInt(e.target.value);
     if (value > 0) {
@@ -57,8 +63,26 @@ const ProductDetails = () => {
 
           <div className="product-details__info">
             <h1>{product.name}</h1>
-            {/* <span className="product-details__category">{product.category}</span> */}
-            <span className="product-details__price">₹{product.price}</span>
+            <div className="product-details__badges">
+              {product.paymentRenewal && (
+                <span className={`badge badge--${product.paymentRenewal.toLowerCase()}`}>
+                  {product.paymentRenewal.replace('_', ' ')}
+                </span>
+              )}
+            </div>
+            <div className="product-details__pricing">
+              <span className="product-details__price">₹{product.price}</span>
+              {product.priceRenewal && (
+                <div className="renewal-info">
+                  <span className="product-details__renewal-price">
+                    Renewal Price: ₹{product.priceRenewal}
+                  </span>
+                  <small className="renewal-note">
+                    * Renewal price applies for repeat purchases
+                  </small>
+                </div>
+              )}
+            </div>
 
             {/* <div className="product-details__quantity">
               <label htmlFor="quantity">Quantity:</label>
@@ -72,7 +96,21 @@ const ProductDetails = () => {
               />
             </div> */}
 
-            <button className="btn btn--primary" onClick={async ()=> {await handleAddToCart(product); navigate('/cart')}}>Add to Cart</button>
+            <div className="product-details__actions">
+              <button className="btn btn--primary" onClick={async ()=> {await handleAddToCart(product); navigate('/cart')}}>Add to Cart</button>
+              
+              {product.productSource && (
+                <a 
+                  href={product.productSourceType === 'url' ? product.productSource : `http://localhost:4010/uploads/${product.productSource}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn--outline"
+                  download={product.productSourceType === 'file' ? product.productSource : undefined}
+                >
+                  {product.productSourceType === 'url' ? 'Visit Product' : 'Download'}
+                </a>
+              )}
+            </div>
 
             <div className="product-details__description">
               <h3>Description</h3>
