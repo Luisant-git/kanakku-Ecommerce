@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./ProductDetails.scss";
-import { getProductByIdApi } from "../../api/Product";
+import { getProductByIdApi, checkDownloadAccessApi } from "../../api/Product";
 import { addToCartApi, getCartCountApi } from "../../api/Cart";
 import { toast } from "react-toastify";
 
@@ -10,12 +10,31 @@ const ProductDetails = () => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState({});
+  const [downloadAccess, setDownloadAccess] = useState({ hasAccess: false });
   const navigate = useNavigate();
 
   const getProductById = async (id) => {
     const response = await getProductByIdApi(parseInt(id));
     console.log("product by id", response);
     setProduct(response);
+    
+    // Check download access if user is logged in
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      // Decode JWT to get real user ID
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userId = payload.userId;
+        console.log('Real user ID from token:', userId);
+        
+        const accessResponse = await checkDownloadAccessApi(id, userId);
+        setDownloadAccess(accessResponse);
+        console.log('Download access response:', accessResponse);
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
   };
 
   const handleAddToCart = async (product) => {
@@ -99,16 +118,22 @@ const ProductDetails = () => {
             <div className="product-details__actions">
               <button className="btn btn--primary" onClick={async ()=> {await handleAddToCart(product); navigate('/cart')}}>Add to Cart</button>
               
-              {product.productSource && (
+              {downloadAccess.hasAccess && downloadAccess.productSource && (
                 <a 
-                  href={product.productSourceType === 'url' ? product.productSource : `http://localhost:4010/uploads/${product.productSource}`}
+                  href={downloadAccess.productSourceType === 'url' ? downloadAccess.productSource : `http://localhost:4010/uploads/${downloadAccess.productSource}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn--outline"
-                  download={product.productSourceType === 'file' ? product.productSource : undefined}
+                  download={downloadAccess.productSourceType === 'file' ? downloadAccess.productSource : undefined}
                 >
-                  {product.productSourceType === 'url' ? 'Visit Product' : 'Download'}
+                  {downloadAccess.productSourceType === 'url' ? 'Visit Product' : 'Download'}
                 </a>
+              )}
+              
+              {product.productSource && !downloadAccess.hasAccess && localStorage.getItem('token') && (
+                <div className="access-message">
+                  <small>Download available after purchase completion</small>
+                </div>
               )}
             </div>
 

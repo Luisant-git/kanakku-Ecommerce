@@ -59,4 +59,14 @@ const deleteProductApi = async (productId) => {
   }
 };
 
-export { createProductApi, getAllProductsApi, updateProductApi, getProductByIdApi, deleteProductApi};
+const checkDownloadAccessApi = async (productId, userId) => {
+  try {
+    const response = await fetch(`${apiUrl}/product-access/${productId}/download-access?userId=${userId}`);
+    return response.json();
+  } catch (error) {
+    console.error('Error checking download access:', error);
+    return { hasAccess: false };
+  }
+};
+
+export { createProductApi, getAllProductsApi, updateProductApi, getProductByIdApi, deleteProductApi, checkDownloadAccessApi};
