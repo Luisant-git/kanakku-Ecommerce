@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import './Checkout.scss'
 import { getCartApi } from '../../api/Cart';
 import { createOrderApi } from '../../api/Order';
+import { getUserProfileApi } from '../../api/Profile';
 import Loading from '../../components/Loading/Loading';
 import { toast } from 'react-toastify';
 
@@ -42,8 +43,26 @@ const Checkout = () => {
     }
   };
 
+  const getUserProfile = async () => {
+    try {
+      const response = await getUserProfileApi();
+      if (response?.id) {
+        setFormData(prev => ({
+          ...prev,
+          address: response.address || '',
+          city: response.city || '',
+          state: response.state || '',
+          zip: response.pincode || ''
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
   useEffect(() => {
     getCartItems();
+    getUserProfile();
   }, []);
 
   const handleChange = (e) => {

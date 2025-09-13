@@ -5,14 +5,14 @@ import { userRegisterApi } from '../../api/Auth'
 
 const Register = () => {
   // const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await userRegisterApi({ email, password })
+      const response = await userRegisterApi({ phone, password })
       if (response && response.token) {
         navigate('/login')
       }
@@ -40,16 +40,17 @@ const Register = () => {
             </div> */}
             
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="phone">Phone Number</label>
               <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="tel"
+                id="phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 required
               />
             </div>
             
+
             <div className="form-group">
               <label htmlFor="password">Password</label>
               <input

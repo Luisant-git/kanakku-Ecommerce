@@ -17,15 +17,15 @@ export class AuthService {
 
   // User Registration
   async userRegister(userRegisterDto: UserRegisterDto) {
-    const { email, name, password } = userRegisterDto;
+    const { name, phone, password } = userRegisterDto;
 
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
-      where: { email },
+      where: { phone },
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException('User with this phone number already exists');
     }
 
     // Hash password
@@ -34,16 +34,16 @@ export class AuthService {
     // Create user
     const user = await this.prisma.user.create({
       data: {
-        email,
         name,
+        phone,
         password: hashedPassword,
       },
     });
 
     // Generate JWT token
     const token = this.jwtService.sign(
-      { userId: user.id, email: user.email, type: 'user' },
-      { secret: process.env.JWT_SECRET },
+      { userId: user.id, phone: user.phone, type: 'user' },
+      { secret: process.env.JWT_SECRET, expiresIn: '7d' },
     );
 
     return {
@@ -52,6 +52,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        phone: user.phone,
       },
       token,
     };
@@ -101,11 +102,11 @@ export class AuthService {
 
   // User Login
   async userLogin(userLoginDto: UserLoginDto) {
-    const { email, password } = userLoginDto;
+    const { phone, password } = userLoginDto;
 
     // Find user
     const user = await this.prisma.user.findUnique({
-      where: { email },
+      where: { phone },
     });
 
     if (!user) {
@@ -120,8 +121,8 @@ export class AuthService {
 
     // Generate JWT token
     const token = this.jwtService.sign(
-      { userId: user.id, email: user.email, type: 'user' },
-      { secret: process.env.JWT_SECRET },
+      { userId: user.id, phone: user.phone, type: 'user' },
+      { secret: process.env.JWT_SECRET, expiresIn: '7d' },
     );
 
     return {
@@ -130,6 +131,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        phone: user.phone,
       },
       token,
     };
@@ -229,7 +231,7 @@ export class AuthService {
       select: {
         id: true,
         name: true,
-        phone: true,
+        email: true,
         address: true,
         city: true,
         state: true,
@@ -238,22 +240,14 @@ export class AuthService {
     });
   }
 
-  async forgotPassword(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+  async forgotPassword(phone: string) {
+    const user = await this.prisma.user.findUnique({ where: { phone } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const resetToken = this.jwtService.sign(
-      { userId: user.id, email: user.email, type: 'reset' },
-      { secret: process.env.JWT_SECRET, expiresIn: '1h' }
-    );
-
-    await this.mailService.sendPasswordResetEmail(email, resetToken);
-
-    return {
-      message: 'Password reset email sent successfully',
-    };
+    // Since users may not have email, password reset via phone would need SMS service
+    throw new NotFoundException('Password reset not available. Please contact support.');
   }
 
   async resetPassword(token: string, newPassword: string) {

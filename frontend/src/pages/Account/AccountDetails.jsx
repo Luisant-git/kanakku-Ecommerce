@@ -8,7 +8,7 @@ const AccountDetails = () => {
   const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
-    phone: "",
+    email: "",
     address: "",
     city: "",
     state: "",
@@ -33,7 +33,7 @@ const AccountDetails = () => {
         setUser(res);
         setFormData({
           name: res.name || "",
-          phone: res.phone || "",
+          email: res.email || "",
           address: res.address || "",
           city: res.city || "",
           state: res.state || "",
@@ -62,8 +62,8 @@ const AccountDetails = () => {
       toast.error("Name is required");
       return false;
     }
-    if (formData.phone && !/^\d{10}$/.test(formData.phone)) {
-      toast.error("Please enter a valid 10-digit phone number");
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      toast.error("Please enter a valid email address");
       return false;
     }
     if (formData.pincode && !/^\d{6}$/.test(formData.pincode)) {
@@ -101,6 +101,7 @@ const AccountDetails = () => {
         setUser(res);
         toast.success("Profile updated successfully!");
         navigate("/account");
+        window.location.reload();
       } else {
         toast.error(res?.message || "Failed to update profile");
       }
@@ -114,7 +115,7 @@ const AccountDetails = () => {
   const handleReset = () => {
     setFormData({
       name: user?.name || "",
-      phone: user?.phone || "",
+      email: user?.email || "",
       address: user?.address || "",
       city: user?.city || "",
       state: user?.state || "",
@@ -150,15 +151,14 @@ const AccountDetails = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="phone">Phone Number</label>
+          <label htmlFor="email">Email Address</label>
           <input
-            type="tel"
-            id="phone"
-            name="phone"
-            value={formData.phone}
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
             onChange={handleInputChange}
-            placeholder="10-digit phone number"
-            maxLength={10}
+            placeholder="Enter your email address"
           />
         </div>
 

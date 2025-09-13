@@ -4,7 +4,7 @@ import './Auth.scss'
 import { userLoginApi } from '../../api/Auth'
 
 const Login = () => {
-  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -13,7 +13,7 @@ const Login = () => {
     e.preventDefault()
     setError('')
     try {
-      const response = await userLoginApi({ email, password })
+      const response = await userLoginApi({ phone, password })
       if (response && response.token) {
         localStorage.setItem('token', response.token)
         navigate('/')
@@ -39,12 +39,12 @@ const Login = () => {
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="phone">Phone Number</label>
               <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="tel"
+                id="phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 required
               />
             </div>
