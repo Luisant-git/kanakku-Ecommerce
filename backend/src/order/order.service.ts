@@ -37,12 +37,13 @@ export class OrderService {
         items: {
           create: await Promise.all(
             cart.items.map(async (item: any) => {
-              const { price, isRenewal } = await this.purchaseHistoryService.calculatePrice(userId, item.productId);
+              const { price, isRenewal, nextRenewalDate } = await this.purchaseHistoryService.calculatePrice(userId, item.productId);
               return {
                 productId: item.productId,
                 quantity: item.quantity,
                 price,
                 isRenewal,
+                nextRenewalDate,
               };
             })
           ),

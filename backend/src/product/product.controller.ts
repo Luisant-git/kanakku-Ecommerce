@@ -6,11 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ApiBody, ApiResponse, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('product')
 @Controller('product')
@@ -47,5 +50,13 @@ export class ProductController {
   @ApiOperation({ summary: 'Delete a product by ID' })
   remove(@Param('id') id: number) {
     return this.productService.remove(Number(id));
+  }
+
+  @Get(':id/renewal-date')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get user next renewal date for product' })
+  getUserRenewalDate(@Param('id') id: number, @Request() req) {
+    const userId = req.user.userId;
+    return this.productService.getUserRenewalDate(Number(userId), Number(id));
   }
 }

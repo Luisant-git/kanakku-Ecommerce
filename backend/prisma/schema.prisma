@@ -92,6 +92,7 @@ model OrderItem {
   quantity  Int
   price     Float
   isRenewal Boolean  @default(false)
+  nextRenewalDate DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

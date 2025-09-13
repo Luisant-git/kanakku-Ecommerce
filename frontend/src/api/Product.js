@@ -69,4 +69,19 @@ const checkDownloadAccessApi = async (productId, userId) => {
   }
 };
 
-export { createProductApi, getAllProductsApi, updateProductApi, getProductByIdApi, deleteProductApi, checkDownloadAccessApi};
+const getUserRenewalDateApi = async (productId) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${apiUrl}/product/${productId}/renewal-date`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error getting renewal date:', error);
+    return { nextRenewalDate: null };
+  }
+};
+
+export { createProductApi, getAllProductsApi, updateProductApi, getProductByIdApi, deleteProductApi, checkDownloadAccessApi, getUserRenewalDateApi};

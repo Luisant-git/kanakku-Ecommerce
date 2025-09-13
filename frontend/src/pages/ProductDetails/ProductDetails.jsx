@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./ProductDetails.scss";
-import { getProductByIdApi, checkDownloadAccessApi } from "../../api/Product";
+import { getProductByIdApi, checkDownloadAccessApi, getUserRenewalDateApi } from "../../api/Product";
 import { addToCartApi, getCartCountApi } from "../../api/Cart";
 import { toast } from "react-toastify";
 
@@ -11,6 +11,7 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState({});
   const [downloadAccess, setDownloadAccess] = useState({ hasAccess: false });
+  const [renewalDate, setRenewalDate] = useState(null);
   const navigate = useNavigate();
 
   const getProductById = async (id) => {
@@ -31,6 +32,12 @@ const ProductDetails = () => {
         const accessResponse = await checkDownloadAccessApi(id, userId);
         setDownloadAccess(accessResponse);
         console.log('Download access response:', accessResponse);
+        
+        // Get renewal date if user has access
+        if (accessResponse.hasAccess) {
+          const renewalResponse = await getUserRenewalDateApi(id);
+          setRenewalDate(renewalResponse.nextRenewalDate);
+        }
       } catch (error) {
         console.error('Error decoding token:', error);
       }
@@ -38,13 +45,17 @@ const ProductDetails = () => {
   };
 
   const handleAddToCart = async (product) => {
-    const data = {
-      productId: product.id,
-      quantity: quantity,
-    };
-    const response = await addToCartApi(data);
-    if (response) {
-     toast.success("Product added to cart");
+    try {
+      const data = {
+        productId: product.id,
+        quantity: quantity,
+      };
+      const response = await addToCartApi(data);
+      if (response) {
+        toast.success(downloadAccess.hasAccess && product.paymentRenewal !== 'ONE_TIME' ? "Renewal added to cart" : "Product added to cart");
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -101,6 +112,18 @@ const ProductDetails = () => {
                   </small>
                 </div>
               )}
+              {renewalDate && (
+                <div className="renewal-date-info">
+                  <h4>Next Renewal</h4>
+                  <p>{new Date(renewalDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</p>
+                </div>
+              )}
             </div>
 
             {/* <div className="product-details__quantity">
@@ -116,7 +139,21 @@ const ProductDetails = () => {
             </div> */}
 
             <div className="product-details__actions">
-              <button className="btn btn--primary" onClick={async ()=> {await handleAddToCart(product); navigate('/cart')}}>Add to Cart</button>
+              <button 
+                className="btn btn--primary" 
+                onClick={async ()=> {await handleAddToCart(product); navigate('/cart')}}
+                disabled={downloadAccess.hasAccess && product.paymentRenewal === 'ONE_TIME'}
+              >
+                {(() => {
+                  if (downloadAccess.hasAccess && product.paymentRenewal === 'ONE_TIME') {
+                    return 'Already Purchased';
+                  }
+                  if (downloadAccess.hasAccess && product.paymentRenewal !== 'ONE_TIME') {
+                    return 'Add Renewal to Cart';
+                  }
+                  return 'Add to Cart';
+                })()}
+              </button>
               
               {downloadAccess.hasAccess && downloadAccess.productSource && (
                 <a 
@@ -135,6 +172,7 @@ const ProductDetails = () => {
                   <small>Download available after purchase completion</small>
                 </div>
               )}
+              
             </div>
 
             <div className="product-details__description">

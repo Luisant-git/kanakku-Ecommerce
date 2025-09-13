@@ -11,6 +11,20 @@ export class CartService {
   ) {}
 
   async addToCart(userId: number, dto: AddToCartDto) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: dto.productId }
+    });
+    
+    if (!product) {
+      throw new Error('Product not found');
+    }
+
+    const hasPurchased = await this.purchaseHistoryService.hasUserPurchasedProduct(userId, dto.productId);
+    
+    if (hasPurchased && product.paymentRenewal === 'ONE_TIME') {
+      throw new Error('This product can only be purchased once');
+    }
+
     let cart = await this.prisma.cart.findFirst({ where: { userId } });
     if (!cart) {
       cart = await this.prisma.cart.create({ data: { userId } });

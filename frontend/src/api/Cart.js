@@ -16,9 +16,14 @@ const addToCartApi = async (productData) => {
       headers: getAuthHeaders(),
       body: JSON.stringify(productData),
     });
-    return response.json();
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to add to cart');
+    }
+    return data;
   } catch (error) {
     console.error("Error adding to cart:", error);
+    throw error;
   }
 };
 

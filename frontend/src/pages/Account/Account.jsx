@@ -56,7 +56,7 @@ const Account = () => {
               <h3>Recent Orders</h3>
               <div className="order-items">
                 {orders.length > 0 ? (
-                  orders[orders.length-1].items.map((item) => (
+                  orders[0].items.map((item) => (
                     <div key={item.id} className="order-item">
                       <div className="item-image">
                         <img

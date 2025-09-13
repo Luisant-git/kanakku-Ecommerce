@@ -3,10 +3,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaymentRenewal } from '@prisma/client';
+import { PurchaseHistoryService } from '../order/purchase-history.service';
 
 @Injectable()
 export class ProductService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private purchaseHistoryService: PurchaseHistoryService
+  ) {}
 
   async create(createProductDto: CreateProductDto) {
     const data = {
@@ -69,5 +73,10 @@ export class ProductService {
     return this.prisma.product.delete({
       where: { id },
     });
+  }
+
+  async getUserRenewalDate(userId: number, productId: number) {
+    const renewalDate = await this.purchaseHistoryService.getUserNextRenewalDate(userId, productId);
+    return { nextRenewalDate: renewalDate };
   }
 }
