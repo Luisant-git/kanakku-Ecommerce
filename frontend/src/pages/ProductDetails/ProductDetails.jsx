@@ -12,9 +12,11 @@ const ProductDetails = () => {
   const [product, setProduct] = useState({});
   const [downloadAccess, setDownloadAccess] = useState({ hasAccess: false });
   const [renewalDate, setRenewalDate] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const getProductById = async (id) => {
+    setLoading(true);
     const response = await getProductByIdApi(parseInt(id));
     console.log("product by id", response);
     setProduct(response);
@@ -42,9 +44,11 @@ const ProductDetails = () => {
         console.error('Error decoding token:', error);
       }
     }
+    setLoading(false);
   };
 
   const handleAddToCart = async (product) => {
+    setLoading(true);
     try {
       const data = {
         productId: product.id,
@@ -57,6 +61,7 @@ const ProductDetails = () => {
     } catch (error) {
       toast.error(error.message);
     }
+    setLoading(false);
   };
 
   const checkRenewalStatus = async () => {
@@ -75,6 +80,16 @@ const ProductDetails = () => {
   useEffect(() => {
     getProductById(id);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="product-details">
+        <div className="container">
+          <div className="loader">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="product-details">
