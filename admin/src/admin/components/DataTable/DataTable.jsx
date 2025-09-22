@@ -40,13 +40,17 @@ const DataTable = ({ data = [], columns = [], onBulkDelete }) => {
   // Filtered data based on search
   const filteredData = useMemo(() => {
     if (!search) return data;
-    return data.filter(row =>
-      columns.some(col => {
-        const value = row[col.key];
-        return value && value.toString().toLowerCase().includes(search.toLowerCase());
-      })
-    );
-  }, [search, data, columns]);
+    return data.filter(row => {
+      const searchLower = search.toLowerCase();
+      return (
+        row.user?.name?.toLowerCase().includes(searchLower) ||
+        row.user?.email?.toLowerCase().includes(searchLower) ||
+        row.user?.phone?.toLowerCase().includes(searchLower) ||
+        row.product?.name?.toLowerCase().includes(searchLower) ||
+        new Date(row.createdAt).toLocaleDateString().toLowerCase().includes(searchLower)
+      );
+    });
+  }, [search, data]);
 
   // Pagination logic
   const totalRows = filteredData.length;

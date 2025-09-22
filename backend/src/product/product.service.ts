@@ -76,14 +76,29 @@ export class ProductService {
       throw new NotFoundException(`Product with ID "${id}" not found`);
     }
 
-    const data = {
-      ...updateProductDto,
-      ...(updateProductDto.paymentRenewal && { paymentRenewal: updateProductDto.paymentRenewal as PaymentRenewal }),
-    };
+    const { price, priceRenewal, paymentRenewal, ...productData } = updateProductDto;
 
-    return this.prisma.product.update({
+    // Update product basic info
+    const updatedProduct = await this.prisma.product.update({
       where: { id },
-      data,
+      data: productData,
+    });
+
+    // Update product versions if price data is provided
+    if (price !== undefined || priceRenewal !== undefined || paymentRenewal !== undefined) {
+      await this.prisma.productVersion.updateMany({
+        where: { productId: id },
+        data: {
+          ...(price !== undefined && { price: Number(price) }),
+          ...(priceRenewal !== undefined && { renewalPrice: priceRenewal ? Number(priceRenewal) : null }),
+          ...(paymentRenewal && { paymentRenewal: paymentRenewal as PaymentRenewal }),
+        },
+      });
+    }
+
+    return this.prisma.product.findUnique({
+      where: { id },
+      include: { versions: true },
     });
   }
 

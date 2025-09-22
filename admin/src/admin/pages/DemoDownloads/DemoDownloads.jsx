@@ -36,9 +36,18 @@ const DemoDownloads = () => {
       render: (user) => (
         <div>
           <div className="user-name">{user?.name || "N/A"}</div>
-          <div className="user-email">{user?.email || "N/A"}</div>
         </div>
       ),
+    },
+    {
+      label: "Email",
+      key: "user",
+      render: (user) => user?.email || "N/A",
+    },
+    {
+      label: "Phone",
+      key: "user",
+      render: (user) => user?.phone || "N/A",
     },
     {
       label: "Product",

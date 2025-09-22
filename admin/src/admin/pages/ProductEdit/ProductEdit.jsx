@@ -36,17 +36,19 @@ const ProductEdit = () => {
       if (!id) return;
       const product = await getProductByIdApi(parseInt(id));
       if (product) {
+        const defaultVersion = product.versions?.find(v => v.isDefault) || product.versions?.[0];
         setFormData({
           name: product.name || "",
           description: product.description || "",
-          price: product.price?.toString() || "",
+          price: defaultVersion?.price?.toString() || "",
           demo: product.demo || "",
           demoFile: null,
           demoType: "url", // "url" or "file"
           // add other fields as needed
-          priceRenewal: product.priceRenewal?.toString() || "",
-          paymentRenewal: product.paymentRenewal || "ONE_TIME",
+          priceRenewal: defaultVersion?.renewalPrice?.toString() || "",
+          paymentRenewal: defaultVersion?.paymentRenewal || "ONE_TIME",
           productSource: product.productSource || "",
+          productSourceFile: null,
           productSourceType: product.productSourceType || "url",
         });
         setImagePreview(
@@ -149,13 +151,26 @@ const ProductEdit = () => {
       demoUrl = formData.demo; // Keep the URL as is
     }
     
+    // Handle file upload for product source
+    let productSourceUrl = formData.productSource;
+    if (formData.productSourceType === 'file' && formData.productSourceFile) {
+      const sourceData = new FormData();
+      sourceData.append("files", formData.productSourceFile);
+      const uploadRes = await uploadImageApi(sourceData);
+      if (uploadRes && uploadRes.urls && uploadRes.urls.length > 0) {
+        productSourceUrl = uploadRes.urls[0].split('/').pop(); // Get just the filename
+      }
+    } else if (formData.productSourceType === 'url') {
+      productSourceUrl = formData.productSource; // Keep the URL as is
+    }
+    
     const productPayload = {
       name: formData.name,
       description: formData.description,
       price: parseFloat(formData.price),
       priceRenewal: formData.priceRenewal ? parseFloat(formData.priceRenewal) : null,
       paymentRenewal: formData.paymentRenewal,
-      productSource: formData.productSource,
+      productSource: productSourceUrl || null,
       productSourceType: formData.productSourceType,
       imageUrl: imageUrls,
       demo: demoUrl || null,
@@ -307,26 +322,46 @@ const ProductEdit = () => {
                   accept=".pdf,.doc,.docx,.zip,.rar,.mp4,.avi,.mov"
                 />
               )}
-              <label>Product Source Type</label>
-              <select
-                name="productSourceType"
-                value={formData.productSourceType}
-                onChange={handleChange}
-              >
-                <option value="url">URL</option>
-                <option value="file">File</option>
-              </select>
-            </div>
-
-            <div className="form-group">
               <label>Product Source</label>
-              <input
-                type="text"
-                name="productSource"
-                placeholder={formData.productSourceType === 'url' ? 'Enter URL' : 'Enter file name'}
-                value={formData.productSource}
-                onChange={handleChange}
-              />
+              <div className="source-type-toggle">
+                <label>
+                  <input
+                    type="radio"
+                    name="productSourceType"
+                    value="url"
+                    checked={formData.productSourceType === "url"}
+                    onChange={handleChange}
+                  />
+                  URL
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="productSourceType"
+                    value="file"
+                    checked={formData.productSourceType === "file"}
+                    onChange={handleChange}
+                  />
+                  File Upload
+                </label>
+              </div>
+              
+              {formData.productSourceType === "url" ? (
+                <input
+                  type="url"
+                  name="productSource"
+                  placeholder="https://example.com/product"
+                  value={formData.productSource}
+                  onChange={handleChange}
+                />
+              ) : (
+                <input
+                  type="file"
+                  name="productSourceFile"
+                  onChange={(e) => setFormData(prev => ({ ...prev, productSourceFile: e.target.files[0] }))}
+                  accept=".pdf,.doc,.docx,.zip,.rar"
+                />
+              )}
             </div>
 
             {/* <div className="form-row">
