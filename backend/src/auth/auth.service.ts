@@ -17,7 +17,7 @@ export class AuthService {
 
   // User Registration
   async userRegister(userRegisterDto: UserRegisterDto) {
-    const { name, phone, password } = userRegisterDto;
+    const { name, company, gstin, address, email, phone, state, city, country, pincode, password } = userRegisterDto;
 
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
@@ -35,7 +35,15 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: {
         name,
+        company,
+        gstin,
+        address,
+        email,
         phone,
+        state,
+        city,
+        country,
+        pincode,
         password: hashedPassword,
       },
     });
@@ -178,12 +186,15 @@ export class AuthService {
       where: { id: userId },
       select: {
         id: true,
-        email: true,
         name: true,
-        phone: true,
+        company: true,
+        gstin: true,
         address: true,
-        city: true,
+        email: true,
+        phone: true,
         state: true,
+        city: true,
+        country: true,
         pincode: true,
       },
     });
@@ -231,10 +242,14 @@ export class AuthService {
       select: {
         id: true,
         name: true,
-        email: true,
+        company: true,
+        gstin: true,
         address: true,
-        city: true,
+        email: true,
+        phone: true,
         state: true,
+        city: true,
+        country: true,
         pincode: true,
       },
     });

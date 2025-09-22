@@ -160,9 +160,21 @@
             gap: 20px;
             font-size: 14px;
             color: #495057;
+            flex-wrap: wrap;
 
             span {
               font-weight: 500;
+              
+              &.license-no {
+                background: #e3f2fd;
+                color: #1565c0;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-family: 'Courier New', monospace;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+              }
             }
           }
         }

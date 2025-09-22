@@ -140,6 +140,14 @@ export class OrderService {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
+    // Add license numbers to items
+    if (order.items) {
+      order.items = order.items.map(item => ({
+        ...item,
+        licenseNo: this.generateLicenseNumber(item.productId, order.userId, item.id, item.version?.version)
+      }));
+    }
+
     return order;
   }
 
@@ -240,6 +248,15 @@ export class OrderService {
 
 
  //total Revenue By Month Of CurrentYear, if not that month started send as null
+  private generateLicenseNumber(productId: number, userId: number, itemId: number, version?: string): string {
+    const versionCode = version === 'SINGLE_USER' ? 'SU' : version === 'MULTI_USER' ? 'MU' : 'ST';
+    const productCode = productId.toString().padStart(3, '0');
+    const userCode = userId.toString().padStart(3, '0');
+    const itemCode = itemId.toString().padStart(4, '0');
+    const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `${versionCode}-${productCode}-${userCode}-${itemCode}-${randomCode}`;
+  }
+
   async totalRevenueByMonthOfCurrentYear() {
     const currentYear = new Date().getFullYear();
     const months = Array.from({ length: 12 }, (_, i) => i + 1);

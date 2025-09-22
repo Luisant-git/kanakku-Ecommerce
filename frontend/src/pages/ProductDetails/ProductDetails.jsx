@@ -153,7 +153,7 @@ const ProductDetails = () => {
               {selectedVersion && (
                 <>
                   <span className="product-details__price">₹{selectedVersion.price.toLocaleString()}</span>
-                  {selectedVersion.renewalPrice && (
+                  {renewalDate && selectedVersion.renewalPrice && (
                     <div className="renewal-info">
                       <span className="product-details__renewal-price">
                         Renewal Price: ₹{selectedVersion.renewalPrice.toLocaleString()}
@@ -165,16 +165,19 @@ const ProductDetails = () => {
                   )}
                 </>
               )}
-              {renewalDate && (
-                <div className="renewal-date-info">
-                  <h4>Next Renewal</h4>
-                  <p>{new Date(renewalDate).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}</p>
+              {downloadAccess.hasAccess && (
+                <div className="license-info">
+                  <h4>License Information</h4>
+                  <div className="license-details">
+                    <p><strong>License No:</strong> {downloadAccess.licenseNo || 'N/A'}</p>
+                    {renewalDate && (
+                      <p><strong>Next Renewal:</strong> {new Date(renewalDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
