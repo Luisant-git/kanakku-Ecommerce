@@ -18,13 +18,15 @@ const ProductCard = ({ product }) => {
           />
         </div>
         <div className="product-card__info">
-          <h3>{product.name}</h3>
-          <div className="product-card__badges">
-            {defaultVersion?.paymentRenewal && (
-              <span className={`badge badge--${defaultVersion.paymentRenewal.toLowerCase()}`}>
-                {defaultVersion.paymentRenewal.replace('_', ' ')}
-              </span>
-            )}
+          <div className="product-card__header">
+            <h3>{product.name}</h3>
+            <div className="product-card__badges">
+              {defaultVersion?.paymentRenewal && (
+                <span className={`badge badge--${defaultVersion.paymentRenewal.toLowerCase()}`}>
+                  {defaultVersion.paymentRenewal.replace('_', ' ')}
+                </span>
+              )}
+            </div>
           </div>
           <div className="product-card__pricing">
             {defaultVersion?.price && (
@@ -32,11 +34,11 @@ const ProductCard = ({ product }) => {
                 ₹{defaultVersion.price.toLocaleString()}
               </span>
             )}
-            {defaultVersion?.renewalPrice && (
+            {/* {defaultVersion?.renewalPrice && (
               <span className="product-card__renewal-price">
                 Renewal: ₹{defaultVersion.renewalPrice.toLocaleString()}
               </span>
-            )}
+            )} */}
           </div>
           <button className="btn btn--small">View Detail</button>
         </div>

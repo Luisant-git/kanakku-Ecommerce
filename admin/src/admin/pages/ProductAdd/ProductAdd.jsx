@@ -18,6 +18,9 @@ const ProductAdd = () => {
     productSourceFile: null,
     productSourceType: "url", // "url" or "file"
     paymentRenewal: "ONE_TIME",
+    demo: "",
+    demoFile: null,
+    demoType: "url", // "url" or "file"
   });
   const [imagePreview, setImagePreview] = useState([]); // array of previews
   const [loading, setLoading] = useState(false);
@@ -89,6 +92,19 @@ const ProductAdd = () => {
     } else if (formData.productSourceType === 'url') {
       productSourceUrl = formData.productSource; // Keep the URL as is
     }
+    
+    // Handle file upload for demo
+    let demoUrl = formData.demo;
+    if (formData.demoType === 'file' && formData.demoFile) {
+      const demoData = new FormData();
+      demoData.append("files", formData.demoFile);
+      const uploadRes = await uploadImageApi(demoData);
+      if (uploadRes && uploadRes.urls && uploadRes.urls.length > 0) {
+        demoUrl = uploadRes.urls[0].split('/').pop(); // Get just the filename
+      }
+    } else if (formData.demoType === 'url') {
+      demoUrl = formData.demo; // Keep the URL as is
+    }
     const productPayload = {
       name: formData.name,
       description: formData.description,
@@ -98,6 +114,7 @@ const ProductAdd = () => {
       productSource: productSourceUrl || null,
       productSourceType: formData.productSourceType,
       paymentRenewal: formData.paymentRenewal,
+      demo: demoUrl || null,
     };
     const res = await createProductApi(productPayload);
     setLoading(false);
@@ -147,6 +164,49 @@ const ProductAdd = () => {
               onChange={handleChange}
               rows="4"
             />
+          </div>
+
+          <div className="form-group">
+            <label>Demo</label>
+            <div className="source-type-toggle">
+              <label>
+                <input
+                  type="radio"
+                  name="demoType"
+                  value="url"
+                  checked={formData.demoType === "url"}
+                  onChange={handleChange}
+                />
+                URL
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="demoType"
+                  value="file"
+                  checked={formData.demoType === "file"}
+                  onChange={handleChange}
+                />
+                File Upload
+              </label>
+            </div>
+            
+            {formData.demoType === "url" ? (
+              <input
+                type="url"
+                name="demo"
+                placeholder="https://example.com/demo"
+                value={formData.demo}
+                onChange={handleChange}
+              />
+            ) : (
+              <input
+                type="file"
+                name="demoFile"
+                onChange={(e) => setFormData(prev => ({ ...prev, demoFile: e.target.files[0] }))}
+                accept=".pdf,.doc,.docx,.zip,.rar,.mp4,.avi,.mov"
+              />
+            )}
           </div>
 
           <div className="form-group">

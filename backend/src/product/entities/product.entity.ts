@@ -4,6 +4,7 @@ export class Product {
   imageUrl: string[];
   description: string;
   price: number;
+  demo: String;
   createdAt: Date;
   updatedAt: Date;
 }

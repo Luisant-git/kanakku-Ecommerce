@@ -1,10 +1,14 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./ProductDetails.scss";
-import { getProductByIdApi, checkDownloadAccessApi, getUserRenewalDateApi } from "../../api/Product";
+import {
+  getProductByIdApi,
+  checkDownloadAccessApi,
+  getUserRenewalDateApi,
+} from "../../api/Product";
 import { addToCartApi, getCartCountApi } from "../../api/Cart";
 import { toast } from "react-toastify";
-
+import { recordDemoDownloadApi } from "../../api/Demo";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -21,34 +25,35 @@ const ProductDetails = () => {
     const response = await getProductByIdApi(parseInt(id));
     console.log("product by id", response);
     setProduct(response);
-    
+
     // Set default selected version
     if (response.versions?.length > 0) {
-      const defaultVersion = response.versions.find(v => v.isDefault) || response.versions[0];
+      const defaultVersion =
+        response.versions.find((v) => v.isDefault) || response.versions[0];
       setSelectedVersion(defaultVersion);
     }
-    
+
     // Check download access if user is logged in
-    const token = localStorage.getItem('token');
-    
+    const token = localStorage.getItem("token");
+
     if (token) {
       // Decode JWT to get real user ID
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = JSON.parse(atob(token.split(".")[1]));
         const userId = payload.userId;
-        console.log('Real user ID from token:', userId);
-        
+        console.log("Real user ID from token:", userId);
+
         const accessResponse = await checkDownloadAccessApi(id, userId);
         setDownloadAccess(accessResponse);
-        console.log('Download access response:', accessResponse);
-        
+        console.log("Download access response:", accessResponse);
+
         // Get renewal date if user has access
         if (accessResponse.hasAccess) {
           const renewalResponse = await getUserRenewalDateApi(id);
           setRenewalDate(renewalResponse.nextRenewalDate);
         }
       } catch (error) {
-        console.error('Error decoding token:', error);
+        console.error("Error decoding token:", error);
       }
     }
     setLoading(false);
@@ -64,7 +69,12 @@ const ProductDetails = () => {
       };
       const response = await addToCartApi(data);
       if (response) {
-        toast.success(downloadAccess.hasAccess && selectedVersion?.paymentRenewal !== 'ONE_TIME' ? "Renewal added to cart" : "Product added to cart");
+        toast.success(
+          downloadAccess.hasAccess &&
+            selectedVersion?.paymentRenewal !== "ONE_TIME"
+            ? "Renewal added to cart"
+            : "Product added to cart"
+        );
       }
     } catch (error) {
       toast.error(error.message);
@@ -116,31 +126,41 @@ const ProductDetails = () => {
 
           <div className="product-details__info">
             <h1>{product.name}</h1>
-            
+
             {/* Product Version Selection */}
             {product.versions?.length > 0 && (
               <div className="product-versions">
                 <h3>Choose Your Plan</h3>
                 <div className="version-options">
                   {product.versions.map((version) => (
-                    <div 
-                      key={version.id} 
-                      className={`version-card ${selectedVersion?.id === version.id ? 'selected' : ''}`}
+                    <div
+                      key={version.id}
+                      className={`version-card ${
+                        selectedVersion?.id === version.id ? "selected" : ""
+                      }`}
                       onClick={() => setSelectedVersion(version)}
                     >
                       <div className="version-header">
-                        <h4>{version.version.replace('_', ' ')}</h4>
-                        {version.isDefault && <span className="default-badge">Recommended</span>}
+                        <h4>{version.version.replace("_", " ")}</h4>
+                        {version.isDefault && (
+                          <span className="default-badge">Recommended</span>
+                        )}
                       </div>
                       <div className="version-pricing">
-                        <span className="version-price">₹{version.price.toLocaleString()}</span>
+                        <span className="version-price">
+                          ₹{version.price.toLocaleString()}
+                        </span>
                         {version.renewalPrice && (
-                          <span className="version-renewal">Renewal: ₹{version.renewalPrice.toLocaleString()}</span>
+                          <span className="version-renewal">
+                            Renewal: ₹{version.renewalPrice.toLocaleString()}
+                          </span>
                         )}
                       </div>
                       <div className="version-type">
-                        <span className={`badge badge--${version.paymentRenewal.toLowerCase()}`}>
-                          {version.paymentRenewal.replace('_', ' ')}
+                        <span
+                          className={`badge badge--${version.paymentRenewal.toLowerCase()}`}
+                        >
+                          {version.paymentRenewal.replace("_", " ")}
                         </span>
                       </div>
                     </div>
@@ -148,15 +168,18 @@ const ProductDetails = () => {
                 </div>
               </div>
             )}
-            
+
             <div className="product-details__pricing">
               {selectedVersion && (
                 <>
-                  <span className="product-details__price">₹{selectedVersion.price.toLocaleString()}</span>
+                  <span className="product-details__price">
+                    ₹{selectedVersion.price.toLocaleString()}
+                  </span>
                   {selectedVersion.renewalPrice && (
                     <div className="renewal-info">
                       <span className="product-details__renewal-price">
-                        Renewal Price: ₹{selectedVersion.renewalPrice.toLocaleString()}
+                        Renewal Price: ₹
+                        {selectedVersion.renewalPrice.toLocaleString()}
                       </span>
                       <small className="renewal-note">
                         * Renewal price applies for repeat purchases
@@ -168,13 +191,15 @@ const ProductDetails = () => {
               {renewalDate && (
                 <div className="renewal-date-info">
                   <h4>Next Renewal</h4>
-                  <p>{new Date(renewalDate).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}</p>
+                  <p>
+                    {new Date(renewalDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
                 </div>
               )}
             </div>
@@ -192,41 +217,96 @@ const ProductDetails = () => {
             </div> */}
 
             <div className="product-details__actions">
-              <button 
-                className="btn btn--primary" 
-                onClick={async ()=> {await handleAddToCart(product); navigate('/cart')}}
-                disabled={downloadAccess.hasAccess && selectedVersion?.paymentRenewal === 'ONE_TIME'}
+              <button
+                className="btn btn--primary"
+                onClick={async () => {
+                  await handleAddToCart(product);
+                  navigate("/cart");
+                }}
+                disabled={
+                  downloadAccess.hasAccess &&
+                  selectedVersion?.paymentRenewal === "ONE_TIME"
+                }
               >
                 {(() => {
-                  if (downloadAccess.hasAccess && selectedVersion?.paymentRenewal === 'ONE_TIME') {
-                    return 'Already Purchased';
+                  if (
+                    downloadAccess.hasAccess &&
+                    selectedVersion?.paymentRenewal === "ONE_TIME"
+                  ) {
+                    return "Already Purchased";
                   }
-                  if (downloadAccess.hasAccess && selectedVersion?.paymentRenewal !== 'ONE_TIME') {
-                    return 'Add Renewal to Cart';
+                  if (
+                    downloadAccess.hasAccess &&
+                    selectedVersion?.paymentRenewal !== "ONE_TIME"
+                  ) {
+                    return "Add Renewal to Cart";
                   }
-                  return 'Add to Cart';
+                  return "Add to Cart";
                 })()}
               </button>
-              
+
               {downloadAccess.hasAccess && downloadAccess.productSource && (
-                <a 
-                  href={downloadAccess.productSourceType === 'url' ? downloadAccess.productSource : `http://localhost:4010/uploads/${downloadAccess.productSource}`}
+                <a
+                  href={
+                    downloadAccess.productSourceType === "url"
+                      ? downloadAccess.productSource
+                      : `http://localhost:4010/uploads/${downloadAccess.productSource}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn--outline"
-                  download={downloadAccess.productSourceType === 'file' ? downloadAccess.productSource : undefined}
+                  download={
+                    downloadAccess.productSourceType === "file"
+                      ? downloadAccess.productSource
+                      : undefined
+                  }
                 >
-                  {downloadAccess.productSourceType === 'url' ? 'Visit Product' : 'Download'}
+                  {downloadAccess.productSourceType === "url"
+                    ? "Visit Product"
+                    : "Download"}
                 </a>
               )}
-              
-              {product.productSource && !downloadAccess.hasAccess && localStorage.getItem('token') && (
+
+              {product.demo && (
+                <button
+                  className="btn btn--secondary"
+                  onClick={async () => {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                      toast.error("Please login to try demo or purchase");
+                      return;
+                    }
+
+                    try {
+                      await recordDemoDownloadApi(product.id);
+                      
+                      // If demo is a URL, open in new tab
+                      if (product.demo.startsWith("http")) {
+                        window.open(product.demo, "_blank");
+                      } else {
+                        // If demo is a file, download it
+                        const link = document.createElement("a");
+                        link.href = `http://localhost:4010/uploads/${product.demo}`;
+                        link.download = product.demo;
+                        link.click();
+                      }
+                    } catch (error) {
+                      console.error('Error recording demo download:', error);
+                    }
+                  }}
+                >
+                  Try Demo
+                </button>
+              )}
+            </div>
+
+            {product.productSource &&
+              !downloadAccess.hasAccess &&
+              localStorage.getItem("token") && (
                 <div className="access-message">
                   <small>Download available after purchase completion</small>
                 </div>
               )}
-              
-            </div>
 
             <div className="product-details__description">
               <h3>Description</h3>

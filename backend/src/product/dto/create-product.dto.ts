@@ -21,6 +21,11 @@ export class CreateProductDto {
   @ApiProperty({ example: 100.0 })
   price: number;
 
+  @ApiProperty({ example: 'Demo URL' })
+  @IsString()
+  @IsOptional()
+  demo: string;
+
   @ApiProperty({ example: 50.0, required: false })
   @IsOptional()
   @IsNumber()
