@@ -46,7 +46,7 @@
     overflow: hidden;
 
     .customer-profile {
-      padding: 2rem;
+      padding: 1rem;
       border-bottom: 1px solid rgba($dark, 0.1);
 
       .profile-header {
@@ -111,8 +111,328 @@
       }
     }
 
+    .purchased-products {
+      padding: 1rem;
+      border-bottom: 1px solid rgba($dark, 0.1);
+
+      h3 {
+        margin: 0 0 1.5rem;
+        font-size: 1.25rem;
+        color: $dark;
+      }
+
+      .products-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        align-items: start;
+        
+        @media (min-width: 768px) {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        
+        @media (min-width: 1200px) {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .product-card {
+        border: 1px solid rgba($dark, 0.1);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        background: white;
+        box-shadow: $shadow-sm;
+        transition: box-shadow 0.2s;
+
+        &:hover {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 1rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid rgba($dark, 0.1);
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          
+          @media (max-width: 480px) {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          h4 {
+            margin: 0;
+            font-size: 1rem;
+            color: $dark;
+            font-weight: 600;
+            flex: 1;
+            
+            @media (min-width: 768px) {
+              font-size: 1.2rem;
+            }
+          }
+
+          .version-badge {
+            background: $primary;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            white-space: nowrap;
+            
+            @media (min-width: 768px) {
+              padding: 0.375rem 0.875rem;
+              font-size: 0.8rem;
+            }
+          }
+        }
+
+        // Invoice Details Section
+        .invoice-section {
+          margin-bottom: 1.5rem;
+          
+          h5 {
+            margin: 0 0 0.75rem;
+            font-size: 1rem;
+            color: $primary;
+            font-weight: 600;
+          }
+
+          .invoice-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            background: rgba($primary, 0.02);
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid rgba($primary, 0.1);
+          }
+
+          .invoice-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba($primary, 0.1);
+            
+            &:last-child {
+              border-bottom: none;
+            }
+            
+            span:first-child {
+              color: rgba($dark, 0.7);
+              font-weight: 500;
+              min-width: 120px;
+            }
+            
+            span:last-child {
+              color: $dark;
+              font-weight: 600;
+              text-align: right;
+            }
+          }
+        }
+
+        // Renewal Information Section
+        .renewal-section {
+          margin-bottom: 1.5rem;
+          
+          h5 {
+            margin: 0 0 0.75rem;
+            font-size: 1rem;
+            color: #f59e0b;
+            font-weight: 600;
+          }
+
+          .renewal-info {
+            background: rgba(#f59e0b, 0.05);
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid rgba(#f59e0b, 0.2);
+          }
+
+          .renewal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(#f59e0b, 0.1);
+            
+            &:last-child {
+              margin-bottom: 0;
+              border-bottom: none;
+            }
+            
+            span:first-child {
+              color: rgba($dark, 0.7);
+              font-weight: 500;
+              min-width: 120px;
+            }
+            
+            .renewal-date {
+              color: #f59e0b;
+              font-weight: 600;
+              text-align: right;
+            }
+            
+            .days-remaining {
+              color: #10b981;
+              font-weight: 600;
+              text-align: right;
+            }
+            
+            span:last-child {
+              text-align: right;
+              font-weight: 600;
+            }
+          }
+        }
+
+        // Version Upgrade Section
+        .upgrade-section {
+          h5 {
+            margin: 0 0 1rem;
+            font-size: 1rem;
+            color: $secondary;
+            font-weight: 600;
+          }
+
+          .upgrade-details {
+            background: rgba($secondary, 0.05);
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid rgba($secondary, 0.2);
+          }
+
+          .upgrade-comparison {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.375rem;
+            
+            .current-version, .new-version {
+              text-align: center;
+              
+              .label {
+                display: block;
+                font-size: 0.75rem;
+                color: rgba($dark, 0.6);
+                margin-bottom: 0.25rem;
+                text-transform: uppercase;
+                font-weight: 500;
+              }
+              
+              .version {
+                display: block;
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: $dark;
+                text-transform: capitalize;
+              }
+            }
+            
+            .arrow {
+              font-size: 1.5rem;
+              color: $secondary;
+              font-weight: bold;
+            }
+          }
+
+          .upgrade-pricing {
+            margin-bottom: 1rem;
+            
+            .price-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 0.75rem;
+              font-size: 0.9rem;
+              padding: 0.5rem 0;
+              border-bottom: 1px solid rgba($secondary, 0.1);
+              
+              &:last-child {
+                border-bottom: none;
+              }
+              
+              &.highlight {
+                padding: 0.75rem;
+                background: rgba($secondary, 0.1);
+                border-radius: 0.375rem;
+                font-weight: 600;
+                border: 1px solid rgba($secondary, 0.2);
+                margin: 0.5rem 0;
+                
+                span:last-child {
+                  color: $secondary;
+                  font-size: 1rem;
+                }
+              }
+              
+              span:first-child {
+                color: rgba($dark, 0.7);
+                font-weight: 500;
+                min-width: 120px;
+              }
+              
+              span:last-child {
+                color: $dark;
+                font-weight: 600;
+                text-align: right;
+              }
+            }
+          }
+
+          .upgrade-btn {
+            width: 100%;
+            background: linear-gradient(135deg, $secondary, darken($secondary, 10%));
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba($secondary, 0.2);
+
+            &:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 4px 8px rgba($secondary, 0.3);
+            }
+
+            &:active {
+              transform: translateY(0);
+            }
+          }
+        }
+      }
+
+      .no-products {
+        background: rgba($dark, 0.05);
+        padding: 2rem;
+        border-radius: 0.5rem;
+        text-align: center;
+
+        p {
+          margin: 0;
+          color: rgba($dark, 0.7);
+        }
+      }
+    }
+
     .customer-orders {
-      padding: 2rem;
+      padding: 1rem;
 
       h3 {
         margin: 0 0 1.5rem;
@@ -125,7 +445,7 @@
         border-collapse: collapse;
 
         th, td {
-          padding: 1rem;
+          padding: 0.75rem;
           text-align: left;
           border-bottom: 1px solid rgba($dark, 0.1);
         }
@@ -193,6 +513,12 @@
           margin: 0;
           color: rgba($dark, 0.7);
         }
+      }
+
+      .order-item-summary {
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+        color: rgba($dark, 0.8);
       }
     }
   }

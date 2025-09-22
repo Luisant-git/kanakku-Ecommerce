@@ -19,43 +19,57 @@
       label {
         display: block;
         margin-bottom: 0.5rem;
-        font-weight: bold;
+        font-weight: 500;
+        color: $dark-color;
+        
+        .required {
+          color: #e74c3c;
+        }
       }
 
-      input, textarea {
+      input, textarea, select {
         width: 100%;
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 0.25rem;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: border-color 0.2s;
+        
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+          box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+        }
+        
+        &:disabled {
+          background-color: #f8f9fa;
+          cursor: not-allowed;
+        }
       }
-
-      input[type="tel"] {
-        width: 100%;
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 0.25rem;
+      
+      select {
+        cursor: pointer;
       }
-
+      
       textarea {
-        height: 6rem;
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 0.25rem;
+        resize: vertical;
+        min-height: 80px;
       }
     }
 
     .form-row {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
       margin-bottom: 1rem;
-
+      
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+      
       .form-group {
-        flex-basis: 48%;
-        margin-right: 2%;
-
-        &:last-child {
-          margin-right: 0;
-        }
+        margin-bottom: 0;
       }
     }
 

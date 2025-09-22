@@ -26,7 +26,20 @@ export class CustomerService {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
-        orders: true,
+        orders: {
+          include: {
+            items: {
+              include: {
+                product: {
+                  include: {
+                    versions: true
+                  }
+                },
+                version: true
+              }
+            }
+          }
+        },
       },
     });
 
@@ -35,6 +48,34 @@ export class CustomerService {
     }
 
     const totalSpent = user.orders.reduce((sum, order) => sum + order.total, 0);
+    
+    // Get purchased products with renewal info
+    const purchasedProducts = [];
+    const productMap = new Map();
+    
+    user.orders.forEach(order => {
+      if (order.status === 'COMPLETED') {
+        order.items.forEach(item => {
+          const key = `${item.productId}-${item.versionId}`;
+          if (!productMap.has(key)) {
+            const nextRenewal = this.calculateNextRenewal(order.createdAt, item.version?.paymentRenewal || 'ONE_TIME');
+            const upgradeOption = this.getUpgradeOption(item.product, item.version);
+            
+            productMap.set(key, {
+              productId: item.productId,
+              productName: item.product.name,
+              version: item.version?.version || 'N/A',
+              price: item.price,
+              purchaseDate: order.createdAt,
+              nextRenewalDate: nextRenewal,
+              paymentRenewal: item.version?.paymentRenewal,
+              orderId: order.id,
+              upgradeOption
+            });
+          }
+        });
+      }
+    });
 
     return {
       id: user.id,
@@ -42,14 +83,45 @@ export class CustomerService {
       email: user.email,
       phone: user.phone,
       address: user.address,
+      city: user.city,
+      state: user.state,
+      pincode: user.pincode,
       joined: user.createdAt,
       orders: user.orders.map(order => ({
         id: order.id,
         date: order.createdAt.toISOString().split('T')[0],
         amount: order.total,
-        status: order.status
+        status: order.status,
+        items: order.items
       })),
-      totalSpent
+      totalSpent,
+      purchasedProducts: Array.from(productMap.values())
+    };
+  }
+
+  private calculateNextRenewal(purchaseDate: Date, paymentRenewal: string): Date | null {
+    if (paymentRenewal === 'ONE_TIME') return null;
+    
+    const nextRenewal = new Date(purchaseDate);
+    if (paymentRenewal === 'MONTHLY') {
+      nextRenewal.setMonth(nextRenewal.getMonth() + 1);
+    } else if (paymentRenewal === 'YEARLY') {
+      nextRenewal.setFullYear(nextRenewal.getFullYear() + 1);
+    }
+    return nextRenewal;
+  }
+
+  private getUpgradeOption(product: any, currentVersion: any) {
+    if (!currentVersion || currentVersion.version === 'MULTI_USER') return null;
+    
+    const multiUserVersion = product.versions.find(v => v.version === 'MULTI_USER');
+    if (!multiUserVersion) return null;
+    
+    const priceDifference = multiUserVersion.price - currentVersion.price;
+    return {
+      toVersion: 'MULTI_USER',
+      additionalCost: priceDifference,
+      newPrice: multiUserVersion.price
     };
   }
 }

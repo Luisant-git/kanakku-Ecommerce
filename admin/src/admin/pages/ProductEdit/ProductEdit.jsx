@@ -44,6 +44,10 @@ const ProductEdit = () => {
           demoFile: null,
           demoType: "url", // "url" or "file"
           // add other fields as needed
+          priceRenewal: product.priceRenewal?.toString() || "",
+          paymentRenewal: product.paymentRenewal || "ONE_TIME",
+          productSource: product.productSource || "",
+          productSourceType: product.productSourceType || "url",
         });
         setImagePreview(
           product.imageUrl && product.imageUrl.length > 0
@@ -149,6 +153,10 @@ const ProductEdit = () => {
       name: formData.name,
       description: formData.description,
       price: parseFloat(formData.price),
+      priceRenewal: formData.priceRenewal ? parseFloat(formData.priceRenewal) : null,
+      paymentRenewal: formData.paymentRenewal,
+      productSource: formData.productSource,
+      productSourceType: formData.productSourceType,
       imageUrl: imageUrls,
       demo: demoUrl || null,
       // add other fields as needed
@@ -299,6 +307,26 @@ const ProductEdit = () => {
                   accept=".pdf,.doc,.docx,.zip,.rar,.mp4,.avi,.mov"
                 />
               )}
+              <label>Product Source Type</label>
+              <select
+                name="productSourceType"
+                value={formData.productSourceType}
+                onChange={handleChange}
+              >
+                <option value="url">URL</option>
+                <option value="file">File</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Product Source</label>
+              <input
+                type="text"
+                name="productSource"
+                placeholder={formData.productSourceType === 'url' ? 'Enter URL' : 'Enter file name'}
+                value={formData.productSource}
+                onChange={handleChange}
+              />
             </div>
 
             {/* <div className="form-row">
@@ -388,17 +416,30 @@ const ProductEdit = () => {
                 />
               </div>
 
-              {/* <div className="form-group">
-                <label>Compare Price</label>
+              <div className="form-group">
+                <label>Renewal Price</label>
                 <input
                   type="number"
                   step="0.01"
-                  name="comparePrice"
+                  name="priceRenewal"
                   placeholder="0.00"
-                  value={formData.comparePrice}
+                  value={formData.priceRenewal}
                   onChange={handleChange}
                 />
-              </div> */}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Payment Renewal</label>
+              <select
+                name="paymentRenewal"
+                value={formData.paymentRenewal}
+                onChange={handleChange}
+              >
+                <option value="ONE_TIME">One Time</option>
+                <option value="MONTHLY">Monthly</option>
+                <option value="YEARLY">Yearly</option>
+              </select>
             </div>
 
             {/* <div className="form-group">

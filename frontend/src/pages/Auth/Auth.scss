@@ -7,7 +7,7 @@
   min-height: calc(100vh - 200px);
 
   .auth-card {
-    max-width: 500px;
+    max-width: 600px;
     margin: 0 auto;
     background: white;
     padding: 2.5rem;
@@ -21,6 +21,16 @@
     }
   }
 
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
   .form-group {
     margin-bottom: 1.5rem;
 
@@ -28,14 +38,41 @@
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 500;
+      color: $dark-color;
+      
+      .required {
+        color: #e74c3c;
+      }
     }
 
-    input {
+    input, select, textarea {
       width: 100%;
       padding: 0.8rem;
       border: 1px solid #ddd;
       border-radius: 4px;
       font-family: inherit;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+      }
+      
+      &:disabled {
+        background-color: #f8f9fa;
+        cursor: not-allowed;
+      }
+    }
+    
+    select {
+      cursor: pointer;
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 80px;
     }
   }
 

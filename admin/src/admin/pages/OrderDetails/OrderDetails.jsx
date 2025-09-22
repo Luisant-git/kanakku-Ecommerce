@@ -123,6 +123,8 @@ const OrderDetails = () => {
                     <div className="item-info">
                       <span>Quantity: {item.quantity || 0}</span>
                       <span>Price: ₹{item.price || 0}</span>
+                      <span>Version: {item.version?.version?.replace('_', ' ') || 'N/A'}</span>
+                      <span className="license-no">License: {item.licenseNo || 'Pending'}</span>
                     </div>
                   </div>
                 </div>

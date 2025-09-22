@@ -9,12 +9,15 @@ datasource db {
 
 model User {
   id    Int @id @default(autoincrement())
-  email String?
   name  String?
-  phone  String @unique
+  company String?
+  gstin String?
   address String?
-  city   String?
+  email String?
+  phone  String @unique
   state  String?
+  city   String?
+  country String? @default("India")
   pincode  String?
   password String
   createdAt DateTime @default(now())

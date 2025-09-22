@@ -17,21 +17,6 @@ const CustomerDetails = () => {
   useEffect(()=>{
     getCustomerById();
   },[])
-  
-  // const customer = {
-  //   id: id,
-  //   name: 'John Doe',
-  //   email: 'john@example.com',
-  //   phone: '+91 9876543210',
-  //   address: '123 Main St, Salem, Tamil Nadu 636001',
-  //   joined: '2023-01-15T10:30:00',
-  //   orders: [
-  //     { id: 1001, date: '2023-05-15', amount: 5998, status: 'completed' },
-  //     { id: 1002, date: '2023-04-10', amount: 19900, status: 'completed' },
-  //     { id: 1003, date: '2023-03-05', amount: 9900, status: 'completed' }
-  //   ],
-  //   totalSpent: 35798
-  // }
 
   return (
     <div className="customer-details-page">
@@ -69,8 +54,112 @@ const CustomerDetails = () => {
           </div>
         </div>
         
+        {/* 1. List of Products Purchased */}
+        <div className="purchased-products">
+          <h3>📦 Purchased Products</h3>
+          {customer?.purchasedProducts?.length > 0 ? (
+            <div className="products-grid">
+              {customer.purchasedProducts.map((product, index) => (
+                <div key={index} className="product-card">
+                  <div className="product-header">
+                    <h4>{product.productName}</h4>
+                    <span className="version-badge">{product.version?.replace('_', ' ')}</span>
+                  </div>
+                  
+                  {/* 2. Invoice Details */}
+                  <div className="invoice-section">
+                    <h5>📄 Invoice Details</h5>
+                    <div className="invoice-grid">
+                      <div className="invoice-item">
+                        <span>Order ID:</span>
+                        <span>#{product.orderId}</span>
+                      </div>
+                      <div className="invoice-item">
+                        <span>Purchase Date:</span>
+                        <span>{new Date(product.purchaseDate).toLocaleDateString()}</span>
+                      </div>
+                      <div className="invoice-item">
+                        <span>Amount Paid:</span>
+                        <span>₹{product.price?.toLocaleString()}</span>
+                      </div>
+                      <div className="invoice-item">
+                        <span>Payment Type:</span>
+                        <span>{product.paymentRenewal?.replace('_', ' ')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. Next Renewal Details */}
+                  {product.nextRenewalDate && (
+                    <div className="renewal-section">
+                      <h5>🔄 Renewal Information</h5>
+                      <div className="renewal-info">
+                        <div className="renewal-item">
+                          <span>Next Renewal:</span>
+                          <span className="renewal-date">{new Date(product.nextRenewalDate).toLocaleDateString()}</span>
+                        </div>
+                        <div className="renewal-item">
+                          <span>Days Remaining:</span>
+                          <span className="days-remaining">
+                            {Math.ceil((new Date(product.nextRenewalDate) - new Date()) / (1000 * 60 * 60 * 24))} days
+                          </span>
+                        </div>
+                        <div className="renewal-item">
+                          <span>Renewal Amount:</span>
+                          <span>₹{product.price?.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 4. Version Upgrade Option */}
+                  {product.upgradeOption && (
+                    <div className="upgrade-section">
+                      <h5>⬆️ Version Upgrade Available</h5>
+                      <div className="upgrade-details">
+                        <div className="upgrade-comparison">
+                          <div className="current-version">
+                            <span className="label">Current:</span>
+                            <span className="version">{product.version?.replace('_', ' ')}</span>
+                          </div>
+                          <div className="arrow">→</div>
+                          <div className="new-version">
+                            <span className="label">Upgrade to:</span>
+                            <span className="version">{product.upgradeOption.toVersion?.replace('_', ' ')}</span>
+                          </div>
+                        </div>
+                        <div className="upgrade-pricing">
+                          <div className="price-item">
+                            <span>Current Price:</span>
+                            <span>₹{product.price?.toLocaleString()}</span>
+                          </div>
+                          <div className="price-item">
+                            <span>New Price:</span>
+                            <span>₹{product.upgradeOption.newPrice?.toLocaleString()}</span>
+                          </div>
+                          <div className="price-item highlight">
+                            <span>Additional Payment:</span>
+                            <span>₹{product.upgradeOption.additionalCost?.toLocaleString()}</span>
+                          </div>
+                        </div>
+                        <button className="upgrade-btn">
+                          💳 Process Upgrade (₹{product.upgradeOption.additionalCost?.toLocaleString()})
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="no-products">
+              <p>No completed purchases found.</p>
+            </div>
+          )}
+        </div>
+
         <div className="customer-orders">
-          <h3>Order History</h3>
+          <h3>📋 Order History</h3>
           {customer?.orders?.length > 0 ? (
             <table className="orders-table">
               <thead>
@@ -79,6 +168,7 @@ const CustomerDetails = () => {
                   <th>Date</th>
                   <th>Amount</th>
                   <th>Status</th>
+                  <th>Items</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -96,6 +186,13 @@ const CustomerDetails = () => {
                       <span className={`status-badge ${order.status}`}>
                         {order?.status?.charAt(0).toUpperCase() + order?.status?.slice(1)}
                       </span>
+                    </td>
+                    <td>
+                      {order.items?.map((item, idx) => (
+                        <div key={idx} className="order-item-summary">
+                          {item.product?.name} ({item.version?.version?.replace('_', ' ') || 'N/A'})
+                        </div>
+                      ))}
                     </td>
                     <td>
                       <Link to={`/admin/orders/${order?.id}`} className="view-btn">

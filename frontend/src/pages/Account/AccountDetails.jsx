@@ -8,12 +8,32 @@ const AccountDetails = () => {
   const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
+    company: "",
+    gstin: "",
     address: "",
-    city: "",
+    email: "",
+    phone: "",
     state: "",
+    city: "",
+    country: "India",
     pincode: ""
   });
+
+  const states = [
+    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
+    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
+    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
+    'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
+  ]
+
+  const cities = {
+    'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Tiruchirappalli'],
+    'Karnataka': ['Bangalore', 'Mysore', 'Hubli', 'Mangalore', 'Belgaum'],
+    'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Aurangabad'],
+    'Gujarat': ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar'],
+    'Rajasthan': ['Jaipur', 'Jodhpur', 'Udaipur', 'Kota', 'Ajmer']
+  }
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
@@ -33,10 +53,14 @@ const AccountDetails = () => {
         setUser(res);
         setFormData({
           name: res.name || "",
-          email: res.email || "",
+          company: res.company || "",
+          gstin: res.gstin || "",
           address: res.address || "",
-          city: res.city || "",
+          email: res.email || "",
+          phone: res.phone || "",
           state: res.state || "",
+          city: res.city || "",
+          country: res.country || "India",
           pincode: res.pincode || ""
         });
       } else {
@@ -53,7 +77,8 @@ const AccountDetails = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
+      ...(name === 'state' && { city: '' }) // Reset city when state changes
     }));
   };
 
@@ -115,10 +140,14 @@ const AccountDetails = () => {
   const handleReset = () => {
     setFormData({
       name: user?.name || "",
-      email: user?.email || "",
+      company: user?.company || "",
+      gstin: user?.gstin || "",
       address: user?.address || "",
-      city: user?.city || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
       state: user?.state || "",
+      city: user?.city || "",
+      country: user?.country || "India",
       pincode: user?.pincode || ""
     });
   };
@@ -137,28 +166,69 @@ const AccountDetails = () => {
       <h2>Edit Profile</h2>
       
       <form onSubmit={handleSubmit} className="profile-form">
-        <div className="form-group">
-          <label htmlFor="name">Full Name *</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            required
-            maxLength={100}
-          />
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="name">Name <span className="required">*</span></label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+              maxLength={100}
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="company">Company</label>
+            <input
+              type="text"
+              id="company"
+              name="company"
+              value={formData.company}
+              onChange={handleInputChange}
+              maxLength={100}
+            />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Enter your email address"
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="phone">Mobile No</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              maxLength={15}
+            />
+          </div>
         </div>
 
         <div className="form-group">
-          <label htmlFor="email">Email Address</label>
+          <label htmlFor="gstin">GSTIN</label>
           <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
+            type="text"
+            id="gstin"
+            name="gstin"
+            value={formData.gstin}
             onChange={handleInputChange}
-            placeholder="Enter your email address"
+            placeholder="Enter GSTIN number"
+            maxLength={15}
           />
         </div>
 
@@ -177,41 +247,63 @@ const AccountDetails = () => {
 
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="city">City</label>
-            <input
-              type="text"
-              id="city"
-              name="city"
-              value={formData.city}
-              onChange={handleInputChange}
-              maxLength={50}
-            />
-          </div>
-
-          <div className="form-group">
             <label htmlFor="state">State</label>
-            <input
-              type="text"
+            <select
               id="state"
               name="state"
               value={formData.state}
               onChange={handleInputChange}
-              maxLength={50}
-            />
+            >
+              <option value="">Select State</option>
+              {states.map(state => (
+                <option key={state} value={state}>{state}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="city">City</label>
+            <select
+              id="city"
+              name="city"
+              value={formData.city}
+              onChange={handleInputChange}
+              disabled={!formData.state}
+            >
+              <option value="">Select City</option>
+              {formData.state && cities[formData.state]?.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
           </div>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="pincode">Pincode</label>
-          <input
-            type="text"
-            id="pincode"
-            name="pincode"
-            value={formData.pincode}
-            onChange={handleInputChange}
-            placeholder="6-digit pincode"
-            maxLength={6}
-          />
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="country">Country</label>
+            <input
+              type="text"
+              id="country"
+              name="country"
+              value={formData.country}
+              onChange={handleInputChange}
+              readOnly
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="pincode">Pincode</label>
+            <input
+              type="text"
+              id="pincode"
+              name="pincode"
+              value={formData.pincode}
+              onChange={handleInputChange}
+              placeholder="6-digit pincode"
+              pattern="[0-9]{6}"
+              maxLength={6}
+            />
+          </div>
         </div>
 
         <div className="form-actions">

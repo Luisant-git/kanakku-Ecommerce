@@ -7,32 +7,47 @@ export class UpdateUserDto {
   @IsString()
   name?: string;
 
-//   @ApiProperty({ example: 'john.doe@example.com' })
-//   @IsOptional()
-//   @IsString()
-//   email?: string;
-
-  @ApiProperty({ example: '1234567890' })
+  @ApiProperty({ example: 'ABC Company' })
   @IsOptional()
   @IsString()
-  phone?: string;
+  company?: string;
+
+  @ApiProperty({ example: '22AAAAA0000A1Z5' })
+  @IsOptional()
+  @IsString()
+  gstin?: string;
 
   @ApiProperty({ example: '123 Main St' })
   @IsOptional()
   @IsString()
   address?: string;
- 
-  @ApiProperty({ example: 'New York'})
+
+  @ApiProperty({ example: 'john.doe@example.com' })
   @IsOptional()
   @IsString()
-  city?: string;
+  email?: string;
 
-  @ApiProperty({ example: 'NY' })
+  @ApiProperty({ example: '1234567890' })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+ 
+  @ApiProperty({ example: 'Tamil Nadu'})
   @IsOptional()
   @IsString()
   state?: string;
 
-  @ApiProperty({ example: '10001' })
+  @ApiProperty({ example: 'Chennai' })
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @ApiProperty({ example: 'India' })
+  @IsOptional()
+  @IsString()
+  country?: string;
+
+  @ApiProperty({ example: '600001' })
   @IsOptional()
   @IsString()
   pincode?: string;
