@@ -10,6 +10,7 @@ const ProductDetails = () => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState({});
+  const [selectedVersion, setSelectedVersion] = useState(null);
   const [downloadAccess, setDownloadAccess] = useState({ hasAccess: false });
   const [renewalDate, setRenewalDate] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,6 +21,12 @@ const ProductDetails = () => {
     const response = await getProductByIdApi(parseInt(id));
     console.log("product by id", response);
     setProduct(response);
+    
+    // Set default selected version
+    if (response.versions?.length > 0) {
+      const defaultVersion = response.versions.find(v => v.isDefault) || response.versions[0];
+      setSelectedVersion(defaultVersion);
+    }
     
     // Check download access if user is logged in
     const token = localStorage.getItem('token');
@@ -52,11 +59,12 @@ const ProductDetails = () => {
     try {
       const data = {
         productId: product.id,
+        versionId: selectedVersion?.id,
         quantity: quantity,
       };
       const response = await addToCartApi(data);
       if (response) {
-        toast.success(downloadAccess.hasAccess && product.paymentRenewal !== 'ONE_TIME' ? "Renewal added to cart" : "Product added to cart");
+        toast.success(downloadAccess.hasAccess && selectedVersion?.paymentRenewal !== 'ONE_TIME' ? "Renewal added to cart" : "Product added to cart");
       }
     } catch (error) {
       toast.error(error.message);
@@ -108,24 +116,54 @@ const ProductDetails = () => {
 
           <div className="product-details__info">
             <h1>{product.name}</h1>
-            <div className="product-details__badges">
-              {product.paymentRenewal && (
-                <span className={`badge badge--${product.paymentRenewal.toLowerCase()}`}>
-                  {product.paymentRenewal.replace('_', ' ')}
-                </span>
-              )}
-            </div>
-            <div className="product-details__pricing">
-              <span className="product-details__price">₹{product.price}</span>
-              {product.priceRenewal && (
-                <div className="renewal-info">
-                  <span className="product-details__renewal-price">
-                    Renewal Price: ₹{product.priceRenewal}
-                  </span>
-                  <small className="renewal-note">
-                    * Renewal price applies for repeat purchases
-                  </small>
+            
+            {/* Product Version Selection */}
+            {product.versions?.length > 0 && (
+              <div className="product-versions">
+                <h3>Choose Your Plan</h3>
+                <div className="version-options">
+                  {product.versions.map((version) => (
+                    <div 
+                      key={version.id} 
+                      className={`version-card ${selectedVersion?.id === version.id ? 'selected' : ''}`}
+                      onClick={() => setSelectedVersion(version)}
+                    >
+                      <div className="version-header">
+                        <h4>{version.version.replace('_', ' ')}</h4>
+                        {version.isDefault && <span className="default-badge">Recommended</span>}
+                      </div>
+                      <div className="version-pricing">
+                        <span className="version-price">₹{version.price.toLocaleString()}</span>
+                        {version.renewalPrice && (
+                          <span className="version-renewal">Renewal: ₹{version.renewalPrice.toLocaleString()}</span>
+                        )}
+                      </div>
+                      <div className="version-type">
+                        <span className={`badge badge--${version.paymentRenewal.toLowerCase()}`}>
+                          {version.paymentRenewal.replace('_', ' ')}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              </div>
+            )}
+            
+            <div className="product-details__pricing">
+              {selectedVersion && (
+                <>
+                  <span className="product-details__price">₹{selectedVersion.price.toLocaleString()}</span>
+                  {selectedVersion.renewalPrice && (
+                    <div className="renewal-info">
+                      <span className="product-details__renewal-price">
+                        Renewal Price: ₹{selectedVersion.renewalPrice.toLocaleString()}
+                      </span>
+                      <small className="renewal-note">
+                        * Renewal price applies for repeat purchases
+                      </small>
+                    </div>
+                  )}
+                </>
               )}
               {renewalDate && (
                 <div className="renewal-date-info">
@@ -157,13 +195,13 @@ const ProductDetails = () => {
               <button 
                 className="btn btn--primary" 
                 onClick={async ()=> {await handleAddToCart(product); navigate('/cart')}}
-                disabled={downloadAccess.hasAccess && product.paymentRenewal === 'ONE_TIME'}
+                disabled={downloadAccess.hasAccess && selectedVersion?.paymentRenewal === 'ONE_TIME'}
               >
                 {(() => {
-                  if (downloadAccess.hasAccess && product.paymentRenewal === 'ONE_TIME') {
+                  if (downloadAccess.hasAccess && selectedVersion?.paymentRenewal === 'ONE_TIME') {
                     return 'Already Purchased';
                   }
-                  if (downloadAccess.hasAccess && product.paymentRenewal !== 'ONE_TIME') {
+                  if (downloadAccess.hasAccess && selectedVersion?.paymentRenewal !== 'ONE_TIME') {
                     return 'Add Renewal to Cart';
                   }
                   return 'Add to Cart';

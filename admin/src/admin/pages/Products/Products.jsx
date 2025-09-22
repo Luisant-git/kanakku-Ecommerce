@@ -60,7 +60,10 @@ const Products = () => {
     {
       key: "price",
       label: "Price",
-      render: (value) => `₹${value.toLocaleString()}`,
+      render: (value, row) => {
+        const defaultVersion = row.versions?.find(v => v.isDefault) || row.versions?.[0];
+        return defaultVersion?.price ? `₹${defaultVersion.price.toLocaleString()}` : 'N/A';
+      },
     },
     {
       key: "actions",

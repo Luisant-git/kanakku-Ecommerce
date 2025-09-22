@@ -2,9 +2,9 @@ import { Line, Doughnut } from 'react-chartjs-2'
 import '../../../utils/chartSetup'
 import ChartCard from '../../components/ChartCard/ChartCard'
 import StatsCard from '../../components/StatsCard/StatsCard'
-import './Analytics.scss'
+import './Reports.scss'
 
-const Analytics = () => {
+const Reports = () => {
   const trafficData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
     datasets: [{
@@ -30,9 +30,9 @@ const Analytics = () => {
   }
 
   return (
-    <div className="analytics">
+    <div className="reports">
       <div className="page-header">
-        <h1>Analytics</h1>
+        <h1>Reports</h1>
       </div>
       
       <div className="stats-grid">
@@ -54,4 +54,4 @@ const Analytics = () => {
   )
 }
 
-export default Analytics
+export default Reports

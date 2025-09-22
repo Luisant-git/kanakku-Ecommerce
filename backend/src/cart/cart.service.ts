@@ -12,16 +12,18 @@ export class CartService {
 
   async addToCart(userId: number, dto: AddToCartDto) {
     const product = await this.prisma.product.findUnique({
-      where: { id: dto.productId }
+      where: { id: dto.productId },
+      include: { versions: true }
     });
     
     if (!product) {
       throw new Error('Product not found');
     }
 
+    const defaultVersion = product.versions.find(v => v.isDefault) || product.versions[0];
     const hasPurchased = await this.purchaseHistoryService.hasUserPurchasedProduct(userId, dto.productId);
     
-    if (hasPurchased && product.paymentRenewal === 'ONE_TIME') {
+    if (hasPurchased && defaultVersion?.paymentRenewal === 'ONE_TIME') {
       throw new Error('This product can only be purchased once');
     }
 
@@ -42,6 +44,7 @@ export class CartService {
         data: {
           cartId: cart.id,
           productId: dto.productId,
+          versionId: defaultVersion?.id,
           quantity: dto.quantity,
         },
       });
@@ -55,7 +58,8 @@ export class CartService {
       include: {
         items: {
           include: {
-            product: true, // make sure product has `price`
+            product: { include: { versions: true } },
+            version: true
           },
         },
       },

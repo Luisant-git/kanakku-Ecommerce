@@ -16,7 +16,7 @@ import OrderAdd from "./admin/pages/OrderAdd/OrderAdd";
 import Customers from "./admin/pages/Customers/Customers";
 import CustomerDetails from "./admin/pages/CustomerDetails/CustomerDetails";
 import CustomerAdd from "./admin/pages/CustomerAdd/CustomerAdd";
-import Analytics from "./admin/pages/Analytics/Analytics";
+import Reports from "./admin/pages/Reports/Reports";
 import Settings from "./admin/pages/Settings/Settings";
 import Login from "./admin/pages/Login/Login";
 import "./styles/admin.scss";

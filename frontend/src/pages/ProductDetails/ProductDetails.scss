@@ -193,4 +193,87 @@
       font-weight: 500;
     }
   }
+
+  .product-versions {
+    margin: 2rem 0;
+    
+    h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: $dark-color;
+    }
+    
+    .version-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .version-card {
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        border-color: $primary-color;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      
+      &.selected {
+        border-color: $primary-color;
+        background: #f0f9ff;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+      }
+      
+      .version-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        
+        h4 {
+          margin: 0;
+          font-size: 1rem;
+          color: $dark-color;
+          text-transform: capitalize;
+        }
+        
+        .default-badge {
+          background: #10b981;
+          color: white;
+          padding: 0.25rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+      }
+      
+      .version-pricing {
+        margin-bottom: 0.75rem;
+        
+        .version-price {
+          display: block;
+          font-size: 1.25rem;
+          font-weight: bold;
+          color: $primary-color;
+          margin-bottom: 0.25rem;
+        }
+        
+        .version-renewal {
+          display: block;
+          font-size: 0.875rem;
+          color: #6b7280;
+        }
+      }
+      
+      .version-type {
+        .badge {
+          font-size: 0.75rem;
+          padding: 0.25rem 0.5rem;
+        }
+      }
+    }
+  }
 }

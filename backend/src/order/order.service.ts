@@ -40,6 +40,7 @@ export class OrderService {
               const { price, isRenewal, nextRenewalDate } = await this.purchaseHistoryService.calculatePrice(userId, item.productId);
               return {
                 productId: item.productId,
+                versionId: item.versionId,
                 quantity: item.quantity,
                 price,
                 isRenewal,
@@ -100,6 +101,7 @@ export class OrderService {
         items: {
           include: {
             product: true,
+            version: true,
           },
         },
         user: {
@@ -121,6 +123,7 @@ export class OrderService {
         items: {
           include: {
             product: true,
+            version: true,
           },
         },
         user: {
@@ -147,6 +150,7 @@ export class OrderService {
         items: {
           include: {
             product: true,
+            version: true,
           },
         },
       },

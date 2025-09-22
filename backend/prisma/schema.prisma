@@ -37,15 +37,28 @@ model Product {
   name        String
   imageUrl    String[]
   description String?
-  price      Float
-  priceRenewal Float?
   productSource String?
   productSourceType String @default("url")
-  paymentRenewal PaymentRenewal @default(ONE_TIME)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  versions    ProductVersion[]
   cartItems   CartItem[]
   orderItems  OrderItem[]
+}
+
+model ProductVersion {
+  id        Int @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  version   VersionType
+  price     Float
+  renewalPrice Float?
+  paymentRenewal PaymentRenewal @default(ONE_TIME)
+  isDefault Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cartItems CartItem[]
+  orderItems OrderItem[]
 }
 
 model Cart {
@@ -63,6 +76,8 @@ model CartItem {
   cartId    Int
   product   Product  @relation(fields: [productId], references: [id])
   productId Int
+  version   ProductVersion? @relation(fields: [versionId], references: [id])
+  versionId Int?
   quantity  Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -89,6 +104,8 @@ model OrderItem {
   orderId   Int
   product   Product  @relation(fields: [productId], references: [id])
   productId Int
+  version   ProductVersion? @relation(fields: [versionId], references: [id])
+  versionId Int?
   quantity  Int
   price     Float
   isRenewal Boolean  @default(false)
@@ -107,4 +124,9 @@ enum PaymentRenewal {
   ONE_TIME
   MONTHLY
   YEARLY
+}
+
+enum VersionType {
+  SINGLE_USER
+  MULTI_USER
 }

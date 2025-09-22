@@ -13,18 +13,43 @@ export class ProductService {
   ) {}
 
   async create(createProductDto: CreateProductDto) {
-    const data = {
-      ...createProductDto,
-      priceRenewal: createProductDto.priceRenewal || null,
-      paymentRenewal: createProductDto.paymentRenewal as PaymentRenewal || PaymentRenewal.ONE_TIME,
-    };
-    return this.prisma.product.create({
-      data,
+    const { price = 0, priceRenewal, paymentRenewal, ...productData } = createProductDto;
+    
+    const product = await this.prisma.product.create({
+      data: productData,
+    });
+
+    // Create default versions for the product
+    await this.prisma.productVersion.createMany({
+      data: [
+        {
+          productId: product.id,
+          version: 'SINGLE_USER',
+          price: Number(price),
+          renewalPrice: priceRenewal ? Number(priceRenewal) : null,
+          paymentRenewal: (paymentRenewal as PaymentRenewal) || PaymentRenewal.ONE_TIME,
+          isDefault: false
+        },
+        {
+          productId: product.id,
+          version: 'MULTI_USER',
+          price: Number(price) * 1.5,
+          renewalPrice: priceRenewal ? Number(priceRenewal) * 1.5 : null,
+          paymentRenewal: (paymentRenewal as PaymentRenewal) || PaymentRenewal.ONE_TIME,
+          isDefault: true
+        }
+      ]
+    });
+
+    return this.prisma.product.findUnique({
+      where: { id: product.id },
+      include: { versions: true }
     });
   }
 
   async findAll() {
     return this.prisma.product.findMany({
+      include: { versions: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -32,6 +57,7 @@ export class ProductService {
   async findOne(id: number) {
     const product = await this.prisma.product.findUnique({
       where: { id },
+      include: { versions: true },
     });
 
     if (!product) {

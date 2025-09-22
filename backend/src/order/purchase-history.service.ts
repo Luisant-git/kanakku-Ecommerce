@@ -18,7 +18,7 @@ export class PurchaseHistoryService {
     return !!existingPurchase;
   }
 
-  private calculateNextRenewalDate(purchaseDate: Date, paymentRenewal: string): Date | undefined {
+  private calculateNextRenewalDate(purchaseDate: Date, paymentRenewal: any): Date | undefined {
     if (paymentRenewal === 'ONE_TIME') return undefined;
     
     const nextRenewal = new Date(purchaseDate);
@@ -40,7 +40,8 @@ export class PurchaseHistoryService {
         }
       },
       include: {
-        product: true,
+        product: { include: { versions: true } },
+        version: true,
         order: true
       },
       orderBy: {
@@ -48,7 +49,13 @@ export class PurchaseHistoryService {
       }
     });
 
-    if (!lastPurchase || lastPurchase.product.paymentRenewal === 'ONE_TIME') {
+    if (!lastPurchase) {
+      return null;
+    }
+    
+    const version = lastPurchase.version || lastPurchase.product.versions.find(v => v.isDefault) || lastPurchase.product.versions[0];
+    
+    if (version?.paymentRenewal === 'ONE_TIME') {
       return null;
     }
 
@@ -58,37 +65,43 @@ export class PurchaseHistoryService {
     }
 
     // Otherwise calculate it from the order creation date
-    return this.calculateNextRenewalDate(lastPurchase.order.createdAt, lastPurchase.product.paymentRenewal) || null;
+    return this.calculateNextRenewalDate(lastPurchase.order.createdAt, version?.paymentRenewal) || null;
   }
 
   async calculatePrice(userId: number, productId: number): Promise<{ price: number; isRenewal: boolean; nextRenewalDate?: Date }> {
     const product = await this.prisma.product.findUnique({
-      where: { id: productId }
+      where: { id: productId },
+      include: { versions: true }
     });
 
     if (!product) {
       throw new Error('Product not found');
     }
 
+    const defaultVersion = product.versions.find(v => v.isDefault) || product.versions[0];
+    if (!defaultVersion) {
+      throw new Error('No product version found');
+    }
+
     const hasPurchased = await this.hasUserPurchasedProduct(userId, productId);
     const currentDate = new Date();
     
     if (hasPurchased) {
-      if (product.paymentRenewal === 'ONE_TIME') {
+      if (defaultVersion.paymentRenewal === 'ONE_TIME') {
         throw new Error('Product already purchased and is one-time only');
       }
       
-      const nextRenewalDate = this.calculateNextRenewalDate(currentDate, product.paymentRenewal);
+      const nextRenewalDate = this.calculateNextRenewalDate(currentDate, defaultVersion.paymentRenewal);
       return {
-        price: product.priceRenewal || product.price,
+        price: defaultVersion.renewalPrice || defaultVersion.price,
         isRenewal: true,
         nextRenewalDate
       };
     }
 
-    const nextRenewalDate = this.calculateNextRenewalDate(currentDate, product.paymentRenewal);
+    const nextRenewalDate = this.calculateNextRenewalDate(currentDate, defaultVersion.paymentRenewal);
     return {
-      price: product.price,
+      price: defaultVersion.price,
       isRenewal: false,
       nextRenewalDate
     };

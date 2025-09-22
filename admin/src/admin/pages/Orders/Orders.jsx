@@ -109,7 +109,14 @@ const orderStatusUpdate = async (id, status) => {
       key: "items",
       label: "Items",
       render: (_, row) => (
-        <div className="items-count">{row.items?.length || 0} items</div>
+        <div className="items-info">
+          <div className="items-count">{row.items?.length || 0} items</div>
+          {row.items?.map((item, index) => (
+            <div key={index} className="item-version">
+              {item.product?.name} ({item.version?.version?.replace('_', ' ') || 'N/A'})
+            </div>
+          ))}
+        </div>
       ),
     },
     // REPLACE the actions render block inside `columns` with this
