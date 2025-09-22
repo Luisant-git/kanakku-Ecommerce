@@ -18,7 +18,7 @@ const StatsCard = ({ title, value, change, icon, color }) => {
     }
   }
 
-  const isPositive = change.startsWith('+')
+  const isPositive = change?.startsWith?.('+')
 
   return (
     <div className={`stats-card ${color}`}>
@@ -26,9 +26,11 @@ const StatsCard = ({ title, value, change, icon, color }) => {
       <div className="content">
         <h3>{title}</h3>
         <p className="value">{value}</p>
-        {/* <p className={`change ${isPositive ? 'positive' : 'negative'}`}>
-          {change}
-        </p> */}
+        {change && (
+          <p className={`change ${isPositive ? 'positive' : 'negative'}`}>
+            {change}
+          </p>
+        )}
       </div>
     </div>
   )

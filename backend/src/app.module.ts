@@ -10,9 +10,11 @@ import { MysqlModule } from './database/mysql.module';
 import { NanoregModule } from './nanoreg/nanoreg.module';
 import { CustomerModule } from './customer/customer.module';
 import { DemoModule } from './demo/demo.module';
+import { SalesReportModule } from './sales-report/sales-report.module';
+import { RenewalReportModule } from './renewal-report/renewal-report.module';
 
 @Module({
-  imports: [AuthModule, ProductModule, UploadModule, CartModule, OrderModule, MysqlModule, NanoregModule, CustomerModule, DemoModule],
+  imports: [AuthModule, ProductModule, UploadModule, CartModule, OrderModule, MysqlModule, NanoregModule, CustomerModule, DemoModule, SalesReportModule, RenewalReportModule],
   controllers: [AppController],
   providers: [AppService],
 })

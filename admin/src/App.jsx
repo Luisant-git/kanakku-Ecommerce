@@ -19,6 +19,8 @@ import CustomerAdd from "./admin/pages/CustomerAdd/CustomerAdd";
 import DemoDownloads from "./admin/pages/DemoDownloads/DemoDownloads";
 import Reports from "./admin/pages/Reports/Reports";
 import Settings from "./admin/pages/Settings/Settings";
+import SalesReport from "./admin/pages/SalesReport/SalesReport";
+import RenewalReport from "./admin/pages/RenewalReport/RenewalReport";
 import Login from "./admin/pages/Login/Login";
 import "./styles/admin.scss";
 import { ToastContainer } from "react-toastify";
@@ -41,6 +43,8 @@ function App() {
           <Route path="customers/add" element={<CustomerAdd />} />
           <Route path="customers/:id" element={<CustomerDetails />} />
           <Route path="demo-downloads" element={<DemoDownloads />} />
+          <Route path="sales-report" element={<SalesReport />} />
+          <Route path="renewal-report" element={<RenewalReport />} />
           {/* <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} /> */}
         </Route>
