@@ -111,9 +111,25 @@ export class ProductService {
       throw new NotFoundException(`Product with ID "${id}" not found`);
     }
 
-    return this.prisma.product.delete({
-      where: { id },
+    // Delete related records first to avoid foreign key constraint violations
+    await this.prisma.$transaction(async (prisma) => {
+      // Delete demo downloads
+      await prisma.demoDownload.deleteMany({
+        where: { productId: id },
+      });
+      
+      // Delete product versions
+      await prisma.productVersion.deleteMany({
+        where: { productId: id },
+      });
+      
+      // Delete the product
+      await prisma.product.delete({
+        where: { id },
+      });
     });
+
+    return { message: `Product with ID "${id}" deleted successfully` };
   }
 
   async getUserRenewalDate(userId: number, productId: number) {
