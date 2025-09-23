@@ -11,13 +11,16 @@ const ProductAdd = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    price: "",
-    priceRenewal: "",
+    singleUserPrice: "",
+    singleUserRenewalPrice: "",
+    singleUserPaymentRenewal: "ONE_TIME",
+    multiUserPrice: "",
+    multiUserRenewalPrice: "",
+    multiUserPaymentRenewal: "ONE_TIME",
     imageUrl: [], // array of files
     productSource: "",
     productSourceFile: null,
     productSourceType: "url", // "url" or "file"
-    paymentRenewal: "ONE_TIME",
     demo: "",
     demoFile: null,
     demoType: "url", // "url" or "file"
@@ -108,13 +111,26 @@ const ProductAdd = () => {
     const productPayload = {
       name: formData.name,
       description: formData.description,
-      price: parseFloat(formData.price),
-      priceRenewal: formData.priceRenewal ? parseFloat(formData.priceRenewal) : null,
       imageUrl: imageUrls,
       productSource: productSourceUrl || null,
       productSourceType: formData.productSourceType,
-      paymentRenewal: formData.paymentRenewal,
       demo: demoUrl || null,
+      versions: [
+        {
+          version: "SINGLE_USER",
+          price: parseFloat(formData.singleUserPrice),
+          renewalPrice: formData.singleUserRenewalPrice ? parseFloat(formData.singleUserRenewalPrice) : null,
+          paymentRenewal: formData.singleUserPaymentRenewal,
+          isDefault: false
+        },
+        {
+          version: "MULTI_USER",
+          price: parseFloat(formData.multiUserPrice),
+          renewalPrice: formData.multiUserRenewalPrice ? parseFloat(formData.multiUserRenewalPrice) : null,
+          paymentRenewal: formData.multiUserPaymentRenewal,
+          isDefault: true
+        }
+      ]
     };
     const res = await createProductApi(productPayload);
     setLoading(false);
@@ -329,45 +345,93 @@ const ProductAdd = () => {
         <div className="form-section">
           <h2 className="section-title">Pricing & Inventory</h2>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>
-                Price <span className="required">*</span>
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                name="price"
-                placeholder="0.00"
-                value={formData.price}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <div className="pricing-versions">
+            {/* <h3>Single User Version</h3> */}
+            <div className="form-row">
+              <div className="form-group">
+                <label>
+                  Single User Price <span className="required">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="singleUserPrice"
+                  placeholder="0.00"
+                  value={formData.singleUserPrice}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Price Renewal</label>
-              <input
-                type="number"
-                step="0.01"
-                name="priceRenewal"
-                placeholder="0.00"
-                value={formData.priceRenewal}
-                onChange={handleChange}
-              />
-            </div>
+              <div className="form-group">
+                <label>Single User Renewal Price</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="singleUserRenewalPrice"
+                  placeholder="0.00"
+                  value={formData.singleUserRenewalPrice}
+                  onChange={handleChange}
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Payment Renewal</label>
-              <select
-                name="paymentRenewal"
-                value={formData.paymentRenewal}
-                onChange={handleChange}
-              >
-                <option value="ONE_TIME">One Time</option>
-                <option value="MONTHLY">Monthly</option>
-                <option value="YEARLY">Yearly</option>
-              </select>
+              <div className="form-group">
+                <label>Payment Renewal</label>
+                <select
+                  name="singleUserPaymentRenewal"
+                  value={formData.singleUserPaymentRenewal}
+                  onChange={handleChange}
+                >
+                  <option value="ONE_TIME">One Time</option>
+                  <option value="MONTHLY">Monthly</option>
+                  <option value="YEARLY">Yearly</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="pricing-versions">
+            {/* <h3>Multi User Version</h3> */}
+            <div className="form-row">
+              <div className="form-group">
+                <label>
+                  Multi User Price <span className="required">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="multiUserPrice"
+                  placeholder="0.00"
+                  value={formData.multiUserPrice}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Multi User Renewal Price</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="multiUserRenewalPrice"
+                  placeholder="0.00"
+                  value={formData.multiUserRenewalPrice}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Payment Renewal</label>
+                <select
+                  name="multiUserPaymentRenewal"
+                  value={formData.multiUserPaymentRenewal}
+                  onChange={handleChange}
+                >
+                  <option value="ONE_TIME">One Time</option>
+                  <option value="MONTHLY">Monthly</option>
+                  <option value="YEARLY">Yearly</option>
+                </select>
+              </div>
             </div>
           </div>
 

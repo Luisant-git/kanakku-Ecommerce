@@ -36,17 +36,21 @@ const ProductEdit = () => {
       if (!id) return;
       const product = await getProductByIdApi(parseInt(id));
       if (product) {
-        const defaultVersion = product.versions?.find(v => v.isDefault) || product.versions?.[0];
+        const singleUserVersion = product.versions?.find(v => v.version === 'SINGLE_USER');
+        const multiUserVersion = product.versions?.find(v => v.version === 'MULTI_USER');
+        
         setFormData({
           name: product.name || "",
           description: product.description || "",
-          price: defaultVersion?.price?.toString() || "",
+          singleUserPrice: singleUserVersion?.price?.toString() || "",
+          singleUserRenewalPrice: singleUserVersion?.renewalPrice?.toString() || "",
+          singleUserPaymentRenewal: singleUserVersion?.paymentRenewal || "ONE_TIME",
+          multiUserPrice: multiUserVersion?.price?.toString() || "",
+          multiUserRenewalPrice: multiUserVersion?.renewalPrice?.toString() || "",
+          multiUserPaymentRenewal: multiUserVersion?.paymentRenewal || "ONE_TIME",
           demo: product.demo || "",
           demoFile: null,
-          demoType: "url", // "url" or "file"
-          // add other fields as needed
-          priceRenewal: defaultVersion?.renewalPrice?.toString() || "",
-          paymentRenewal: defaultVersion?.paymentRenewal || "ONE_TIME",
+          demoType: "url",
           productSource: product.productSource || "",
           productSourceFile: null,
           productSourceType: product.productSourceType || "url",
@@ -167,14 +171,26 @@ const ProductEdit = () => {
     const productPayload = {
       name: formData.name,
       description: formData.description,
-      price: parseFloat(formData.price),
-      priceRenewal: formData.priceRenewal ? parseFloat(formData.priceRenewal) : null,
-      paymentRenewal: formData.paymentRenewal,
       productSource: productSourceUrl || null,
       productSourceType: formData.productSourceType,
       imageUrl: imageUrls,
       demo: demoUrl || null,
-      // add other fields as needed
+      versions: [
+        {
+          version: "SINGLE_USER",
+          price: parseFloat(formData.singleUserPrice),
+          renewalPrice: formData.singleUserRenewalPrice ? parseFloat(formData.singleUserRenewalPrice) : null,
+          paymentRenewal: formData.singleUserPaymentRenewal,
+          isDefault: false
+        },
+        {
+          version: "MULTI_USER",
+          price: parseFloat(formData.multiUserPrice),
+          renewalPrice: formData.multiUserRenewalPrice ? parseFloat(formData.multiUserRenewalPrice) : null,
+          paymentRenewal: formData.multiUserPaymentRenewal,
+          isDefault: true
+        }
+      ]
     };
     const res = await updateProductApi(id, productPayload);
     if (res && res.id) {
@@ -435,46 +451,92 @@ const ProductEdit = () => {
               Pricing Information
             </h2>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>
-                  Price <span className="required">*</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  name="price"
-                  placeholder="0.00"
-                  value={formData.price}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div className="pricing-versions">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>
+                    Single User Price <span className="required">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="singleUserPrice"
+                    placeholder="0.00"
+                    value={formData.singleUserPrice}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-              <div className="form-group">
-                <label>Renewal Price</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  name="priceRenewal"
-                  placeholder="0.00"
-                  value={formData.priceRenewal}
-                  onChange={handleChange}
-                />
+                <div className="form-group">
+                  <label>Single User Renewal Price</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="singleUserRenewalPrice"
+                    placeholder="0.00"
+                    value={formData.singleUserRenewalPrice}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Payment Renewal</label>
+                  <select
+                    name="singleUserPaymentRenewal"
+                    value={formData.singleUserPaymentRenewal}
+                    onChange={handleChange}
+                  >
+                    <option value="ONE_TIME">One Time</option>
+                    <option value="MONTHLY">Monthly</option>
+                    <option value="YEARLY">Yearly</option>
+                  </select>
+                </div>
               </div>
             </div>
 
-            <div className="form-group">
-              <label>Payment Renewal</label>
-              <select
-                name="paymentRenewal"
-                value={formData.paymentRenewal}
-                onChange={handleChange}
-              >
-                <option value="ONE_TIME">One Time</option>
-                <option value="MONTHLY">Monthly</option>
-                <option value="YEARLY">Yearly</option>
-              </select>
+            <div className="pricing-versions">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>
+                    Multi User Price <span className="required">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="multiUserPrice"
+                    placeholder="0.00"
+                    value={formData.multiUserPrice}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Multi User Renewal Price</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="multiUserRenewalPrice"
+                    placeholder="0.00"
+                    value={formData.multiUserRenewalPrice}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Payment Renewal</label>
+                  <select
+                    name="multiUserPaymentRenewal"
+                    value={formData.multiUserPaymentRenewal}
+                    onChange={handleChange}
+                  >
+                    <option value="ONE_TIME">One Time</option>
+                    <option value="MONTHLY">Monthly</option>
+                    <option value="YEARLY">Yearly</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             {/* <div className="form-group">

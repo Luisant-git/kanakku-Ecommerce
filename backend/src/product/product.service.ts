@@ -12,34 +12,26 @@ export class ProductService {
     private purchaseHistoryService: PurchaseHistoryService
   ) {}
 
-  async create(createProductDto: CreateProductDto) {
-    const { price = 0, priceRenewal, paymentRenewal, ...productData } = createProductDto;
+  async create(createProductDto: any) {
+    const { versions, ...productData } = createProductDto;
     
     const product = await this.prisma.product.create({
       data: productData,
     });
 
-    // Create default versions for the product
-    await this.prisma.productVersion.createMany({
-      data: [
-        {
+    // Create versions from admin form data
+    if (versions && versions.length > 0) {
+      await this.prisma.productVersion.createMany({
+        data: versions.map(version => ({
           productId: product.id,
-          version: 'SINGLE_USER',
-          price: Number(price),
-          renewalPrice: priceRenewal ? Number(priceRenewal) : null,
-          paymentRenewal: (paymentRenewal as PaymentRenewal) || PaymentRenewal.ONE_TIME,
-          isDefault: false
-        },
-        {
-          productId: product.id,
-          version: 'MULTI_USER',
-          price: Number(price) * 1.5,
-          renewalPrice: priceRenewal ? Number(priceRenewal) * 1.5 : null,
-          paymentRenewal: (paymentRenewal as PaymentRenewal) || PaymentRenewal.ONE_TIME,
-          isDefault: true
-        }
-      ]
-    });
+          version: version.version,
+          price: Number(version.price),
+          renewalPrice: version.renewalPrice ? Number(version.renewalPrice) : null,
+          paymentRenewal: version.paymentRenewal as PaymentRenewal,
+          isDefault: version.isDefault
+        }))
+      });
+    }
 
     return this.prisma.product.findUnique({
       where: { id: product.id },
@@ -67,7 +59,7 @@ export class ProductService {
     return product;
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto) {
+  async update(id: number, updateProductDto: any) {
     const existingProduct = await this.prisma.product.findUnique({
       where: { id },
     });
@@ -76,7 +68,7 @@ export class ProductService {
       throw new NotFoundException(`Product with ID "${id}" not found`);
     }
 
-    const { price, priceRenewal, paymentRenewal, ...productData } = updateProductDto;
+    const { versions, ...productData } = updateProductDto;
 
     // Update product basic info
     const updatedProduct = await this.prisma.product.update({
@@ -84,15 +76,23 @@ export class ProductService {
       data: productData,
     });
 
-    // Update product versions if price data is provided
-    if (price !== undefined || priceRenewal !== undefined || paymentRenewal !== undefined) {
-      await this.prisma.productVersion.updateMany({
-        where: { productId: id },
-        data: {
-          ...(price !== undefined && { price: Number(price) }),
-          ...(priceRenewal !== undefined && { renewalPrice: priceRenewal ? Number(priceRenewal) : null }),
-          ...(paymentRenewal && { paymentRenewal: paymentRenewal as PaymentRenewal }),
-        },
+    // Update versions if provided
+    if (versions && versions.length > 0) {
+      // Delete existing versions
+      await this.prisma.productVersion.deleteMany({
+        where: { productId: id }
+      });
+      
+      // Create new versions
+      await this.prisma.productVersion.createMany({
+        data: versions.map(version => ({
+          productId: id,
+          version: version.version,
+          price: Number(version.price),
+          renewalPrice: version.renewalPrice ? Number(version.renewalPrice) : null,
+          paymentRenewal: version.paymentRenewal as PaymentRenewal,
+          isDefault: version.isDefault
+        }))
       });
     }
 
