@@ -9,6 +9,7 @@ export class SalesReportService {
 
   async getSalesReport(filters: SalesReportFilterDto) {
     const whereClause: Prisma.OrderWhereInput = {};
+    let monthOnlyFilter: number | null = null;
 
     // Status filter
     if (filters.status) {
@@ -44,6 +45,9 @@ export class SalesReportService {
         gte: startDate,
         lte: endDate
       };
+    } else if (filters.month && !filters.year) {
+      // Filter by month across all years using raw SQL
+      monthOnlyFilter = parseInt(filters.month);
     } else if (filters.year) {
       const year = parseInt(filters.year);
       const startDate = new Date(year, 0, 1);
@@ -55,34 +59,84 @@ export class SalesReportService {
       };
     }
 
-    const orders = await this.prisma.order.findMany({
-      where: whereClause,
-      include: {
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true
+    let orders;
+    
+    // Handle month-only filter with raw SQL
+    if (monthOnlyFilter) {
+      const month = monthOnlyFilter;
+      
+      const rawOrders = await this.prisma.$queryRaw<{id: number}[]>`
+        SELECT o.id
+        FROM "Order" o
+        WHERE EXTRACT(MONTH FROM o."createdAt") = ${month}
+        ${filters.status ? Prisma.sql`AND o.status = ${filters.status}` : Prisma.empty}
+        ${filters.productId ? Prisma.sql`AND EXISTS (
+          SELECT 1 FROM "OrderItem" oi 
+          WHERE oi."orderId" = o.id AND oi."productId" = ${parseInt(filters.productId)}
+        )` : Prisma.empty}
+        ORDER BY o."createdAt" DESC
+      `;
+      
+      // Get full order data with relations for the filtered orders
+      const orderIds = rawOrders.map(order => order.id);
+      orders = await this.prisma.order.findMany({
+        where: { id: { in: orderIds } },
+        include: {
+          items: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              },
+              version: {
+                select: {
+                  version: true
+                }
               }
-            },
-            version: {
-              select: {
-                version: true
-              }
+            }
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true
             }
           }
         },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true
+        orderBy: { createdAt: 'desc' }
+      });
+    } else {
+      orders = await this.prisma.order.findMany({
+        where: whereClause,
+        include: {
+          items: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  name: true
+                }
+              },
+              version: {
+                select: {
+                  version: true
+                }
+              }
+            }
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
           }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+    }
 
     // Calculate summary
     const totalOrders = orders.length;

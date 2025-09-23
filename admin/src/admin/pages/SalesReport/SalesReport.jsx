@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { Dropdown, Form } from "react-bootstrap";
+import { Select, InputNumber, Button, Space } from "antd";
 import DataTable from "../../components/DataTable/DataTable";
 import StatsCard from "../../components/StatsCard/StatsCard";
 import OrderStatusBadge from "../../components/OrderStatusBadge/OrderStatusBadge";
 import { getAllSalesReport } from "../../api/salesReport";
 import { getAllProductsApi } from "../../api/Product";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "./SalesReport.scss";
+
+const { Option } = Select;
 
 const SalesReport = () => {
   const [reportData, setReportData] = useState({ summary: {}, orders: [] });
@@ -73,7 +74,6 @@ const SalesReport = () => {
   const handleProductSelect = (product) => {
     setFilters(prev => ({ ...prev, productId: product.id.toString() }));
     setSelectedProduct(product);
-    setProductSearch("");
   };
 
   const clearProductSelection = () => {
@@ -138,93 +138,63 @@ const SalesReport = () => {
 
       <div className="filters-section">
         <div className="filters-row">
-          <select
-            value={filters.status}
-            onChange={(e) => handleFilterChange("status", e.target.value)}
-          >
-            <option value="">All Status</option>
-            <option value="PENDING">Pending</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
-
-          <Dropdown className="d-inline-block">
-            <Dropdown.Toggle 
-              variant="outline-secondary" 
-              className="d-flex justify-content-between align-items-center text-start"
-              style={{ minWidth: '200px' }}
+          <Space wrap>
+            <Select
+              placeholder="All Status"
+              style={{ width: 120 }}
+              value={filters.status || undefined}
+              onChange={(value) => handleFilterChange("status", value || "")}
+              allowClear
             >
-              <span className="text-truncate">
-                {selectedProduct ? selectedProduct.name : 'Select Product'}
-              </span>
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="w-100 shadow-sm" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-              <div className="px-3 py-2 border-bottom">
-                <Form.Control
-                  size="sm"
-                  type="text"
-                  placeholder="Search products..."
-                  value={productSearch}
-                  onChange={(e) => setProductSearch(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  className="border-0 bg-light"
-                />
-              </div>
-              {selectedProduct && (
-                <>
-                  <Dropdown.Item 
-                    className="text-danger fw-bold py-2" 
-                    onClick={clearProductSelection}
-                  >
-                    <i className="bi bi-x-circle me-2"></i>
-                    Clear Selection
-                  </Dropdown.Item>
-                  <Dropdown.Divider className="my-1" />
-                </>
-              )}
-              {filteredProducts.length > 0 ? (
-                filteredProducts.slice(0, 20).map((product) => (
-                  <Dropdown.Item
-                    key={product.id}
-                    active={selectedProduct?.id === product.id}
-                    onClick={() => handleProductSelect(product)}
-                    className="py-2 px-3"
-                  >
-                    <span className="text-truncate d-block">{product.name}</span>
-                  </Dropdown.Item>
-                ))
-              ) : (
-                <Dropdown.ItemText className="text-muted fst-italic py-3 text-center">
-                  No products found
-                </Dropdown.ItemText>
-              )}
-            </Dropdown.Menu>
-          </Dropdown>
+              <Option value="PENDING">Pending</Option>
+              <Option value="COMPLETED">Completed</Option>
+              <Option value="CANCELLED">Cancelled</Option>
+            </Select>
 
-          <input
-            type="number"
-            placeholder="Year"
-            value={filters.year}
-            onChange={(e) => handleFilterChange("year", e.target.value)}
-          />
+            <Select
+              showSearch
+              placeholder="Select Product"
+              style={{ minWidth: 200 }}
+              value={selectedProduct?.id}
+              onSearch={setProductSearch}
+              onChange={(value) => {
+                const product = products.find(p => p.id === value);
+                if (product) handleProductSelect(product);
+              }}
+              allowClear
+              onClear={clearProductSelection}
+              filterOption={false}
+            >
+              {filteredProducts.slice(0, 20).map((product) => (
+                <Option key={product.id} value={product.id}>
+                  {product.name}
+                </Option>
+              ))}
+            </Select>
 
-          <input
-            type="number"
-            placeholder="Month (1-12)"
-            min="1"
-            max="12"
-            value={filters.month}
-            onChange={(e) => handleFilterChange("month", e.target.value)}
-          />
+            <InputNumber
+              placeholder="Year"
+              style={{ width: 100 }}
+              value={filters.year || undefined}
+              onChange={(value) => handleFilterChange("year", value || "")}
+            />
 
-          {/* <input
-            type="date"
-            value={filters.date}
-            onChange={(e) => handleFilterChange("date", e.target.value)}
-          /> */}
+            <InputNumber
+              placeholder="Month"
+              style={{ width: 100 }}
+              min={1}
+              max={12}
+              value={filters.month || undefined}
+              onChange={(value) => handleFilterChange("month", value || "")}
+            />
 
-          <button onClick={applyFilters} className="apply-btn">Apply</button>
-          <button onClick={clearFilters} className="clear-btn">Clear</button>
+            <Button type="primary" onClick={applyFilters}>
+              Apply
+            </Button>
+            <Button onClick={clearFilters}>
+              Clear
+            </Button>
+          </Space>
         </div>
       </div>
 
