@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Dropdown, Form } from "react-bootstrap";
+import { Select, Input, Button, Space } from "antd";
 import DataTable from "../../components/DataTable/DataTable";
 import StatsCard from "../../components/StatsCard/StatsCard";
 import { getPendingRenewalReport } from "../../api/renewalReport";
 import { getAllProductsApi } from "../../api/Product";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "./RenewalReport.scss";
+
+const { Option } = Select;
 
 const RenewalReport = () => {
   const [reportData, setReportData] = useState({ summary: {}, expiredItems: [] });
@@ -60,7 +61,6 @@ const RenewalReport = () => {
   const handleProductSelect = (product) => {
     setFilters(prev => ({ ...prev, productId: product.id.toString() }));
     setSelectedProduct(product);
-    setProductSearch("");
   };
 
   const clearProductSelection = () => {
@@ -100,61 +100,35 @@ const RenewalReport = () => {
 
       <div className="filters-section">
         <div className="filters-row">
-          <Dropdown className="d-inline-block">
-            <Dropdown.Toggle 
-              variant="outline-secondary" 
-              className="d-flex justify-content-between align-items-center text-start"
-              style={{ minWidth: '200px' }}
+          <Space>
+            <Select
+              showSearch
+              placeholder="Select Product"
+              style={{ minWidth: 200 }}
+              value={selectedProduct?.id}
+              onSearch={setProductSearch}
+              onChange={(value) => {
+                const product = products.find(p => p.id === value);
+                if (product) handleProductSelect(product);
+              }}
+              allowClear
+              onClear={clearProductSelection}
+              filterOption={false}
             >
-              <span className="text-truncate">
-                {selectedProduct ? selectedProduct.name : 'Select Product'}
-              </span>
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="w-100 shadow-sm" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-              <div className="px-3 py-2 border-bottom">
-                <Form.Control
-                  size="sm"
-                  type="text"
-                  placeholder="Search products..."
-                  value={productSearch}
-                  onChange={(e) => setProductSearch(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  className="border-0 bg-light"
-                />
-              </div>
-              {selectedProduct && (
-                <>
-                  <Dropdown.Item 
-                    className="text-danger fw-bold py-2" 
-                    onClick={clearProductSelection}
-                  >
-                    <i className="bi bi-x-circle me-2"></i>
-                    Clear Selection
-                  </Dropdown.Item>
-                  <Dropdown.Divider className="my-1" />
-                </>
-              )}
-              {filteredProducts.length > 0 ? (
-                filteredProducts.slice(0, 20).map((product) => (
-                  <Dropdown.Item
-                    key={product.id}
-                    active={selectedProduct?.id === product.id}
-                    onClick={() => handleProductSelect(product)}
-                    className="py-2 px-3"
-                  >
-                    <span className="text-truncate d-block">{product.name}</span>
-                  </Dropdown.Item>
-                ))
-              ) : (
-                <Dropdown.ItemText className="text-muted fst-italic py-3 text-center">
-                  No products found
-                </Dropdown.ItemText>
-              )}
-            </Dropdown.Menu>
-          </Dropdown>
-
-          <button onClick={applyFilters} className="apply-btn">Apply</button>
-          <button onClick={clearFilters} className="clear-btn">Clear</button>
+              {filteredProducts.slice(0, 20).map((product) => (
+                <Option key={product.id} value={product.id}>
+                  {product.name}
+                </Option>
+              ))}
+            </Select>
+            
+            <Button type="primary" onClick={applyFilters}>
+              Apply
+            </Button>
+            <Button onClick={clearFilters}>
+              Clear
+            </Button>
+          </Space>
         </div>
       </div>
 
