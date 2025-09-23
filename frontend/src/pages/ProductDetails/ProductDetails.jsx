@@ -266,7 +266,7 @@ const ProductDetails = () => {
                 </a>
               )}
 
-              {product.demo && (
+              {product.demo && !downloadAccess.hasAccess && (
                 <button
                   className="btn btn--secondary"
                   onClick={async () => {
