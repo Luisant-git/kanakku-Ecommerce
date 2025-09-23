@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:4010";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
