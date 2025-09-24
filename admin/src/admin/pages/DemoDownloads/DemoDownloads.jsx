@@ -18,7 +18,6 @@ const DemoDownloads = () => {
       console.log('Fetched demo downloads:', data);
       setDemoDownloads(data);
     } catch (error) {
-      toast.error("Failed to fetch demo downloads");
       console.error("Error fetching demo downloads:", error);
     } finally {
       setLoading(false);

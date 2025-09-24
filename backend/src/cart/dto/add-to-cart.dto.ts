@@ -5,5 +5,8 @@ export class AddToCartDto {
   productId: number;
 
   @ApiProperty({ example: 1 })
+  versionId: number;
+
+  @ApiProperty({ example: 1 })
   quantity: number;
 }

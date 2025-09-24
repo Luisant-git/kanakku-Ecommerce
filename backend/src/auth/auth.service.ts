@@ -51,7 +51,7 @@ export class AuthService {
     // Generate JWT token
     const token = this.jwtService.sign(
       { userId: user.id, phone: user.phone, type: 'user' },
-      { secret: process.env.JWT_SECRET, expiresIn: '7d' },
+      { secret: process.env.JWT_SECRET, expiresIn: '999y' },
     );
 
     return {
@@ -130,7 +130,7 @@ export class AuthService {
     // Generate JWT token
     const token = this.jwtService.sign(
       { userId: user.id, phone: user.phone, type: 'user' },
-      { secret: process.env.JWT_SECRET, expiresIn: '7d' },
+      { secret: process.env.JWT_SECRET, expiresIn: '999y' },
     );
 
     return {

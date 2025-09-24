@@ -22,6 +22,7 @@ import Settings from "./admin/pages/Settings/Settings";
 import SalesReport from "./admin/pages/SalesReport/SalesReport";
 import RenewalReport from "./admin/pages/RenewalReport/RenewalReport";
 import Login from "./admin/pages/Login/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 import "./styles/admin.scss";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -31,7 +32,11 @@ function App() {
     <Router>
       <Routes>
         <Route path="/admin/login" element={<Login />} />
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
           <Route index element={<Dashboard />} />
           <Route path="products" element={<Products />} />
           <Route path="products/add" element={<ProductAdd />} />

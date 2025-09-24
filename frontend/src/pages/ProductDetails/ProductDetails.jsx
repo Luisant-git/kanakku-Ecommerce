@@ -19,6 +19,7 @@ const ProductDetails = () => {
   const [renewalDate, setRenewalDate] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const userId = localStorage.getItem("token");
 
   const getProductById = async (id) => {
     setLoading(true);
@@ -67,6 +68,8 @@ const ProductDetails = () => {
         versionId: selectedVersion?.id,
         quantity: quantity,
       };
+      console.log('version----check--',data);
+      
       const response = await addToCartApi(data);
       if (response) {
         toast.success(
@@ -172,7 +175,9 @@ const ProductDetails = () => {
             <div className="product-details__pricing">
               {selectedVersion && (
                 <>
-                  <span className="product-details__price">₹{selectedVersion.price.toLocaleString()}</span>
+                  <span className="product-details__price">
+                    ₹{selectedVersion.price.toLocaleString()}
+                  </span>
                   {renewalDate && selectedVersion.renewalPrice && (
                     <div className="renewal-info">
                       <span className="product-details__renewal-price">
@@ -190,13 +195,19 @@ const ProductDetails = () => {
                 <div className="license-info">
                   <h4>License Information</h4>
                   <div className="license-details">
-                    <p><strong>License No:</strong> {downloadAccess.licenseNo || 'N/A'}</p>
+                    <p>
+                      <strong>License No:</strong>{" "}
+                      {downloadAccess.licenseNo || "N/A"}
+                    </p>
                     {renewalDate && (
-                      <p><strong>Next Renewal:</strong> {new Date(renewalDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}</p>
+                      <p>
+                        <strong>Next Renewal:</strong>{" "}
+                        {new Date(renewalDate).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -219,6 +230,12 @@ const ProductDetails = () => {
               <button
                 className="btn btn--primary"
                 onClick={async () => {
+                  const token = localStorage.getItem("token");
+                  if (!token) {
+                    toast.error("Please login to continue...");
+                    navigate('/login')
+                    return;
+                  }
                   await handleAddToCart(product);
                   navigate("/cart");
                 }}
@@ -272,13 +289,14 @@ const ProductDetails = () => {
                   onClick={async () => {
                     const token = localStorage.getItem("token");
                     if (!token) {
-                      toast.error("Please login to try demo or purchase");
+                      toast.error("Please login to continue...");
+                      navigate('/login')
                       return;
                     }
 
                     try {
                       await recordDemoDownloadApi(product.id);
-                      
+
                       // If demo is a URL, open in new tab
                       if (product.demo.startsWith("http")) {
                         window.open(product.demo, "_blank");
@@ -290,7 +308,7 @@ const ProductDetails = () => {
                         link.click();
                       }
                     } catch (error) {
-                      console.error('Error recording demo download:', error);
+                      console.error("Error recording demo download:", error);
                     }
                   }}
                 >

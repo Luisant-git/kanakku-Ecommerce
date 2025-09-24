@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import './Login.scss'
 import { loginApi } from '../../api/Login'
 import { toast } from 'react-toastify'
+import { setToken, decodeToken } from '../../../utils/auth'
 
 const Login = () => {
   const [email, setEmail] = useState('')
@@ -16,10 +17,14 @@ const Login = () => {
       loginApi({ email, password })
         .then((data) => {
           if (data && data.token) {
-            console.log(data);
-            localStorage.setItem('token', data.token)
-            toast.success('Login successful')
-            navigate('/admin')
+            const decoded = decodeToken(data.token)
+            if (decoded && decoded.type === 'admin') {
+              setToken(data.token)
+              toast.success('Login successful')
+              navigate('/admin')
+            } else {
+              setError('Access denied. Admin privileges required.')
+            }
           } else {
             setError('Invalid credentials')
           }

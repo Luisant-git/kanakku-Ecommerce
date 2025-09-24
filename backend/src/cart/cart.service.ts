@@ -20,10 +20,15 @@ export class CartService {
       throw new Error('Product not found');
     }
 
-    const defaultVersion = product.versions.find(v => v.isDefault) || product.versions[0];
+    // Validate that the specified version exists for this product
+    const selectedVersion = product.versions.find(v => v.id === dto.versionId);
+    if (!selectedVersion) {
+      throw new Error('Invalid version selected for this product');
+    }
+
     const hasPurchased = await this.purchaseHistoryService.hasUserPurchasedProduct(userId, dto.productId);
     
-    if (hasPurchased && defaultVersion?.paymentRenewal === 'ONE_TIME') {
+    if (hasPurchased && selectedVersion?.paymentRenewal === 'ONE_TIME') {
       throw new Error('This product can only be purchased once');
     }
 
@@ -32,7 +37,7 @@ export class CartService {
       cart = await this.prisma.cart.create({ data: { userId } });
     }
     let cartItem = await this.prisma.cartItem.findFirst({
-      where: { cartId: cart.id, productId: dto.productId },
+      where: { cartId: cart.id, productId: dto.productId, versionId: dto.versionId },
     });
     if (cartItem) {
       cartItem = await this.prisma.cartItem.update({
@@ -44,7 +49,7 @@ export class CartService {
         data: {
           cartId: cart.id,
           productId: dto.productId,
-          versionId: defaultVersion?.id,
+          versionId: dto.versionId,
           quantity: dto.quantity,
         },
       });
