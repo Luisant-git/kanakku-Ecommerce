@@ -339,7 +339,7 @@ const Checkout = () => {
               {cartItems.map((item) => (
                   <div key={item._id} className="summary-item">
                     <span>{item.product.name}</span>
-                    <span>₹{item.product.price}</span>
+                    <span>₹{item.effectivePrice || item.version?.price || item.product.versions?.[0]?.price}</span>
                   </div>
                 ))}
             </div>
