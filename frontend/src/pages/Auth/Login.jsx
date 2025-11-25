@@ -1,28 +1,91 @@
-import { useState, useContext } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import './Auth.scss'
-import { userLoginApi } from '../../api/Auth'
+import { sendOtpApi, verifyOtpApi, otpLoginApi } from '../../api/Auth'
 
 const Login = () => {
   const [phone, setPhone] = useState('')
-  const [password, setPassword] = useState('')
+  const [otp, setOtp] = useState('')
+  const [step, setStep] = useState('phone') // 'phone', 'otp', 'complete'
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault()
+    setLoading(true)
     setError('')
+    
     try {
-      const response = await userLoginApi({ phone, password })
+      const response = await sendOtpApi({ phone })
+      if (response && response.message) {
+        setMessage('OTP sent to your WhatsApp')
+        setStep('otp')
+      } else {
+        setError(response?.message || 'Failed to send OTP')
+      }
+    } catch (error) {
+      setError('Failed to send OTP. Please try again.')
+    }
+    setLoading(false)
+  }
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    
+    try {
+      const response = await verifyOtpApi({ phone, otp })
+      if (response && response.message) {
+        if (response.requiresRegistration) {
+          // User needs to complete registration
+          navigate('/register', { state: { phone, verified: true } })
+        } else {
+          // Proceed to login
+          handleOtpLogin()
+        }
+      } else {
+        setError(response?.message || 'Invalid OTP')
+      }
+    } catch (error) {
+      setError('Failed to verify OTP. Please try again.')
+    }
+    setLoading(false)
+  }
+
+  const handleOtpLogin = async () => {
+    setLoading(true)
+    try {
+      const response = await otpLoginApi({ phone, otp })
       if (response && response.token) {
         localStorage.setItem('token', response.token)
-        navigate('/')
+        setMessage('Login successful!')
+        setTimeout(() => navigate('/'), 1000)
       } else {
-        setError(response.message || 'Login failed')
+        setError(response?.message || 'Login failed')
       }
     } catch (error) {
       setError('Login failed. Please try again.')
     }
+    setLoading(false)
+  }
+
+  const handleResendOtp = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await sendOtpApi({ phone })
+      if (response && response.message) {
+        setMessage('OTP resent to your WhatsApp')
+      } else {
+        setError('Failed to resend OTP')
+      }
+    } catch (error) {
+      setError('Failed to resend OTP')
+    }
+    setLoading(false)
   }
 
   return (
@@ -37,33 +100,64 @@ const Login = () => {
             </div>
           )}
           
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="phone">Phone Number</label>
-              <input
-                type="tel"
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
+          {message && (
+            <div className="message success">
+              {message}
             </div>
-            
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            
-            <button type="submit" className="btn btn--primary btn--block">
-              Login
-            </button>
-          </form>
+          )}
+
+          {step === 'phone' && (
+            <form onSubmit={handleSendOtp}>
+              <div className="form-group">
+                <label htmlFor="phone">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Enter your phone number with country code"
+                  required
+                />
+              </div>
+              
+              <button type="submit" className="btn btn--primary btn--block" disabled={loading}>
+                {loading ? 'Sending OTP...' : 'Send OTP via WhatsApp'}
+              </button>
+            </form>
+          )}
+
+          {step === 'otp' && (
+            <form onSubmit={handleVerifyOtp}>
+              <div className="form-group">
+                <label htmlFor="otp">Enter OTP</label>
+                <input
+                  type="text"
+                  id="otp"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter 6-digit OTP"
+                  maxLength="6"
+                  required
+                />
+                <small>OTP sent to {phone}</small>
+              </div>
+              
+              <button type="submit" className="btn btn--primary btn--block" disabled={loading}>
+                {loading ? 'Verifying...' : 'Verify OTP & Login'}
+              </button>
+              
+              <div className="otp-resend">
+                <button 
+                  type="button" 
+                  className="btn btn--link" 
+                  onClick={handleResendOtp}
+                  disabled={loading}
+                >
+                  Resend OTP
+                </button>
+              </div>
+            </form>
+          )}
           
           <div className="auth-links">
             <p>

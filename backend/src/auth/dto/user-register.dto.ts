@@ -24,7 +24,7 @@ export class UserRegisterDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: '+1234567890' })
+  @ApiProperty({ example: '+919876543210' })
   @IsString()
   phone: string;
 
@@ -45,10 +45,11 @@ export class UserRegisterDto {
   @IsString()
   pincode: string;
 
-  @ApiProperty({ example: 'password123', minLength: 6 })
-  @IsString()
-  @MinLength(6)
-  password: string;
+  // Remove password field since we're using OTP
+  // @ApiProperty({ example: 'password123', minLength: 6 })
+  // @IsString()
+  // @MinLength(6)
+  // password: string;
 }
 
 export class AdminRegisterDto {

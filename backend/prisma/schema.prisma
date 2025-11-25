@@ -8,22 +8,25 @@ datasource db {
 }
 
 model User {
-  id    Int @id @default(autoincrement())
-  name  String?
-  company String?
-  gstin String?
-  address String?
-  email String?
-  phone  String @unique
-  state  String?
-  city   String?
-  country String? @default("India")
-  pincode  String?
-  password String
+  id        Int      @id @default(autoincrement())
+  name      String?
+  company   String?
+  gstin     String?
+  address   String?
+  email     String?
+  phone     String   @unique
+  state     String?
+  city      String?
+  country   String?  @default("India")
+  pincode   String?
+  password  String
+  otp       String?
+  otpExpiry DateTime?
+  isVerified Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  carts Cart[]
-  orders Order[]
+  carts     Cart[]
+  orders    Order[]
   demoDownloads DemoDownload[]
 }
 

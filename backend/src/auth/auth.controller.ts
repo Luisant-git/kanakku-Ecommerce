@@ -2,9 +2,10 @@ import { Controller, Post, Body, Request, Get, UseGuards, Patch, Req } from '@ne
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { UserRegisterDto, AdminRegisterDto } from './dto/user-register.dto';
-import { UserLoginDto, AdminLoginDto } from './dto/user-login.dto';
+import { SendOtpDto, VerifyOtpDto, OtpLoginDto } from './dto/otp-login.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AdminLoginDto } from './dto/user-login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
@@ -13,6 +14,30 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+    @Post('user/send-otp')
+  @ApiOperation({ summary: 'Send OTP to user via WhatsApp' })
+  @ApiResponse({ status: 200, description: 'OTP sent successfully.' })
+  @ApiResponse({ status: 400, description: 'Failed to send OTP.' })
+  async sendOtp(@Body() sendOtpDto: SendOtpDto) {
+    return this.authService.sendOtp(sendOtpDto);
+  }
+
+  @Post('user/verify-otp')
+  @ApiOperation({ summary: 'Verify OTP' })
+  @ApiResponse({ status: 200, description: 'OTP verified successfully.' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired OTP.' })
+  async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
+    return this.authService.verifyOtp(verifyOtpDto);
+  }
+
+  @Post('user/otp-login')
+  @ApiOperation({ summary: 'User login with OTP' })
+  @ApiResponse({ status: 200, description: 'User login successful.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async otpLogin(@Body() otpLoginDto: OtpLoginDto) {
+    return this.authService.otpLogin(otpLoginDto);
+  }
+
   // User Endpoints
   @Post('user/register')
   @ApiOperation({ summary: 'User registration' })
@@ -20,14 +45,6 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async userRegister(@Body() userRegisterDto: UserRegisterDto) {
     return this.authService.userRegister(userRegisterDto);
-  }
-
-  @Post('user/login')
-  @ApiOperation({ summary: 'User login' })
-  @ApiResponse({ status: 200, description: 'User login successful.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async userLogin(@Body() userLoginDto: UserLoginDto) {
-    return this.authService.userLogin(userLoginDto);
   }
 
   @Post('user/forgot-password')
