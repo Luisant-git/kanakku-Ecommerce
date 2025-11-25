@@ -17,6 +17,7 @@ const ProductDetails = () => {
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [downloadAccess, setDownloadAccess] = useState({ hasAccess: false });
   const [renewalDate, setRenewalDate] = useState(null);
+  const [purchasedVersionType, setPurchasedVersionType] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const userId = localStorage.getItem("token");
@@ -46,6 +47,7 @@ const ProductDetails = () => {
 
         const accessResponse = await checkDownloadAccessApi(id, userId);
         setDownloadAccess(accessResponse);
+        setPurchasedVersionType(accessResponse.purchasedVersionType || null);
         console.log("Download access response:", accessResponse);
 
         // Get renewal date if user has access
@@ -68,15 +70,19 @@ const ProductDetails = () => {
         versionId: selectedVersion?.id,
         quantity: quantity,
       };
-      console.log('version----check--',data);
-      
+      console.log("version----check--", data);
+
       const response = await addToCartApi(data);
       if (response) {
-        toast.success(
+        const isRenewal =
           downloadAccess.hasAccess &&
-            selectedVersion?.paymentRenewal !== "ONE_TIME"
-            ? "Renewal added to cart"
-            : "Product added to cart"
+          selectedVersion?.paymentRenewal !== "ONE_TIME" &&
+          !(
+            purchasedVersionType === "MULTI_USER" &&
+            selectedVersion?.version === "SINGLE_USER"
+          );
+        toast.success(
+          isRenewal ? "Renewal added to cart" : "Product added to cart"
         );
       }
     } catch (error) {
@@ -153,11 +159,15 @@ const ProductDetails = () => {
                         <span className="version-price">
                           ₹{version.price.toLocaleString()}
                         </span>
-                        {version.renewalPrice && (
-                          <span className="version-renewal">
-                            Renewal: ₹{version.renewalPrice.toLocaleString()}
-                          </span>
-                        )}
+                        {version.renewalPrice &&
+                          !(
+                            purchasedVersionType === "MULTI_USER" &&
+                            version.version === "SINGLE_USER"
+                          ) && (
+                            <span className="version-renewal">
+                              Renewal: ₹{version.renewalPrice.toLocaleString()}
+                            </span>
+                          )}
                       </div>
                       <div className="version-type">
                         <span
@@ -178,17 +188,22 @@ const ProductDetails = () => {
                   <span className="product-details__price">
                     ₹{selectedVersion.price.toLocaleString()}
                   </span>
-                  {renewalDate && selectedVersion.renewalPrice && (
-                    <div className="renewal-info">
-                      <span className="product-details__renewal-price">
-                        Renewal Price: ₹
-                        {selectedVersion.renewalPrice.toLocaleString()}
-                      </span>
-                      <small className="renewal-note">
-                        * Renewal price applies for repeat purchases
-                      </small>
-                    </div>
-                  )}
+                  {renewalDate &&
+                    selectedVersion.renewalPrice &&
+                    !(
+                      purchasedVersionType === "MULTI_USER" &&
+                      selectedVersion.version === "SINGLE_USER"
+                    ) && (
+                      <div className="renewal-info">
+                        <span className="product-details__renewal-price">
+                          Renewal Price: ₹
+                          {selectedVersion.renewalPrice.toLocaleString()}
+                        </span>
+                        <small className="renewal-note">
+                          * Renewal price applies for repeat purchases
+                        </small>
+                      </div>
+                    )}
                 </>
               )}
               {downloadAccess.hasAccess && (
@@ -233,7 +248,7 @@ const ProductDetails = () => {
                   const token = localStorage.getItem("token");
                   if (!token) {
                     toast.error("Please login to continue...");
-                    navigate('/login')
+                    navigate("/login");
                     return;
                   }
                   await handleAddToCart(product);
@@ -241,7 +256,9 @@ const ProductDetails = () => {
                 }}
                 disabled={
                   downloadAccess.hasAccess &&
-                  selectedVersion?.paymentRenewal === "ONE_TIME"
+                  (selectedVersion?.paymentRenewal === "ONE_TIME" ||
+                    (purchasedVersionType === "MULTI_USER" &&
+                      selectedVersion?.version === "SINGLE_USER"))
                 }
               >
                 {(() => {
@@ -253,7 +270,11 @@ const ProductDetails = () => {
                   }
                   if (
                     downloadAccess.hasAccess &&
-                    selectedVersion?.paymentRenewal !== "ONE_TIME"
+                    selectedVersion?.paymentRenewal !== "ONE_TIME" &&
+                    !(
+                      purchasedVersionType === "MULTI_USER" &&
+                      selectedVersion?.version === "SINGLE_USER"
+                    )
                   ) {
                     return "Add Renewal to Cart";
                   }
@@ -290,7 +311,7 @@ const ProductDetails = () => {
                     const token = localStorage.getItem("token");
                     if (!token) {
                       toast.error("Please login to continue...");
-                      navigate('/login')
+                      navigate("/login");
                       return;
                     }
 

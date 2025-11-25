@@ -36,7 +36,6 @@ export class OrderController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get all orders' })
   @ApiResponse({ status: 200, description: 'List of all orders.' })
@@ -97,7 +96,6 @@ export class OrderController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get order by ID' })
   @ApiResponse({ status: 200, description: 'Order details.' })
@@ -106,7 +104,6 @@ export class OrderController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Update an order' })
   @ApiResponse({ status: 200, description: 'Order updated successfully.' })
