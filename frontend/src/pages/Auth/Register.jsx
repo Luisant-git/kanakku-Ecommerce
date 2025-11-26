@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./Auth.scss";
-import { userRegisterApi, sendOtpApi } from "../../api/Auth";
+import { userRegisterApi } from "../../api/Auth";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -16,8 +16,6 @@ const Register = () => {
     country: "India",
     pincode: "",
   });
-  const [otpStep, setOtpStep] = useState("phone"); // 'phone', 'otp', 'complete'
-  const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -28,9 +26,11 @@ const Register = () => {
   useEffect(() => {
     if (location.state?.phone && location.state?.verified) {
       setFormData((prev) => ({ ...prev, phone: location.state.phone }));
-      setOtpStep("complete");
+    } else {
+      // Redirect to login if not coming from verified OTP
+      navigate('/login');
     }
-  }, [location.state]);
+  }, [location.state, navigate]);
 
   // ... states and cities arrays remain the same
 
@@ -43,43 +43,8 @@ const Register = () => {
     }));
   };
 
-  const handleSendOtp = async (e) => {
-    e.preventDefault();
-    if (!formData.phone) {
-      setError("Phone number is required");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    try {
-      const response = await sendOtpApi({ phone: formData.phone });
-      if (response && response.message) {
-        setMessage("OTP sent to your WhatsApp");
-        setOtpStep("otp");
-      } else {
-        setError(response?.message || "Failed to send OTP");
-      }
-    } catch (error) {
-      setError("Failed to send OTP. Please try again.");
-    }
-    setLoading(false);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // If not verified, send OTP first
-    if (otpStep === "phone") {
-      await handleSendOtp(e);
-      return;
-    }
-
-    // If OTP sent but not verified, show error
-    if (otpStep === "otp") {
-      setError("Please verify OTP first");
-      return;
-    }
 
     // Complete registration
     setLoading(true);
@@ -103,67 +68,13 @@ const Register = () => {
     <div className="auth-page">
       <div className="container">
         <div className="auth-card">
-          <h1>Register</h1>
+          <h1>Complete Registration</h1>
+          <p>Please fill in your details to complete registration for {formData.phone}</p>
 
           {error && <div className="message error">{error}</div>}
           {message && <div className="message success">{message}</div>}
 
-          {otpStep === "phone" && (
-            <div className="otp-verification-step">
-              <h3>Verify Your Phone</h3>
-              <p>
-                We'll send an OTP to your WhatsApp to verify your phone number.
-              </p>
-              <div className="form-group">
-                <label htmlFor="phone">Phone Number</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="Enter your phone number with country code"
-                  required
-                />
-              </div>
-              <button
-                type="button"
-                className="btn btn--primary btn--block"
-                onClick={handleSendOtp}
-                disabled={loading}
-              >
-                {loading ? "Sending OTP..." : "Send OTP via WhatsApp"}
-              </button>
-            </div>
-          )}
-
-          {otpStep === "otp" && (
-            <div className="otp-verification-step">
-              <h3>Enter OTP</h3>
-              <p>Enter the OTP sent to your WhatsApp {formData.phone}</p>
-              <div className="form-group">
-                <label htmlFor="otp">OTP</label>
-                <input
-                  type="text"
-                  id="otp"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter 6-digit OTP"
-                  maxLength="6"
-                />
-              </div>
-              <button
-                type="button"
-                className="btn btn--primary btn--block"
-                onClick={() => setOtpStep("complete")}
-              >
-                Verify OTP & Continue
-              </button>
-            </div>
-          )}
-
-          {otpStep === "complete" && (
-            <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
               {/* Registration form fields remain the same */}
               <div className="form-row">
                 <div className="form-group">
@@ -285,12 +196,11 @@ const Register = () => {
               >
                 {loading ? "Registering..." : "Complete Registration"}
               </button>
-            </form>
-          )}
+          </form>
 
           <div className="auth-links">
             <p>
-              Already have an account? <Link to="/login">Login</Link>
+              <Link to="/login">Back to Login</Link>
             </p>
           </div>
         </div>

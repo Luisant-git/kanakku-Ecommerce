@@ -37,40 +37,24 @@ const Login = () => {
     setError('')
     
     try {
-      const response = await verifyOtpApi({ phone, otp })
-      if (response && response.message) {
-        if (response.requiresRegistration) {
-          // User needs to complete registration
-          navigate('/register', { state: { phone, verified: true } })
-        } else {
-          // Proceed to login
-          handleOtpLogin()
-        }
-      } else {
-        setError(response?.message || 'Invalid OTP')
-      }
-    } catch (error) {
-      setError('Failed to verify OTP. Please try again.')
-    }
-    setLoading(false)
-  }
-
-  const handleOtpLogin = async () => {
-    setLoading(true)
-    try {
       const response = await otpLoginApi({ phone, otp })
       if (response && response.token) {
         localStorage.setItem('token', response.token)
         setMessage('Login successful!')
         setTimeout(() => navigate('/'), 1000)
+      } else if (response && (response.requiresRegistration || response.message === 'Please complete registration first')) {
+        // User needs to complete registration
+        navigate('/register', { state: { phone, verified: true } })
       } else {
-        setError(response?.message || 'Login failed')
+        setError(response?.message || 'Invalid or expired OTP')
       }
     } catch (error) {
-      setError('Login failed. Please try again.')
+      setError('Invalid or expired OTP')
     }
     setLoading(false)
   }
+
+
 
   const handleResendOtp = async () => {
     setLoading(true)
@@ -160,9 +144,6 @@ const Login = () => {
           )}
           
           <div className="auth-links">
-            <p>
-              Don't have an account? <Link to="/register">Register</Link>
-            </p>
             <p>
               <Link to="/forgot-password">Forgot password?</Link>
             </p>

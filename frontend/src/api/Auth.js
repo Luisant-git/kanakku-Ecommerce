@@ -92,11 +92,27 @@ const resetPasswordApi = async (userData) => {
   }
 };
 
+const checkUserExistsApi = async (phoneData) => {
+  try {
+    const response = await fetch(`${apiUrl}/auth/user/check-exists`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(phoneData),
+    });
+    return response.json();
+  } catch (error) {
+    console.error("Error checking user existence:", error);
+  }
+};
+
 export { 
   sendOtpApi, 
   verifyOtpApi, 
   otpLoginApi, 
   userRegisterApi, 
   forgotPasswordApi, 
-  resetPasswordApi 
+  resetPasswordApi,
+  checkUserExistsApi 
 }
