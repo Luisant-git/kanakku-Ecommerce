@@ -289,6 +289,36 @@ export class OrderService {
     return parseInt(`${productCode}${userCode}${timestamp}`);
   }
 
+  async getAllOrderItems() {
+    const items = await this.prisma.orderItem.findMany({
+      include: {
+        product: true,
+        version: true,
+        order: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                company: true,
+                gstin: true,
+                address: true,
+                state: true,
+                city: true,
+                pincode: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    console.log('Order items found:', items.length);
+    return items;
+  }
+
   async totalRevenueByMonthOfCurrentYear() {
     const currentYear = new Date().getFullYear();
     const months = Array.from({ length: 12 }, (_, i) => i + 1);

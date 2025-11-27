@@ -85,6 +85,13 @@ export class OrderController {
     return this.orderService.totalRevenueByMonthOfCurrentYear();
   }
 
+  @Get('items')
+  @ApiOperation({ summary: 'Get all order items' })
+  @ApiResponse({ status: 200, description: 'List of all order items.' })
+  getAllOrderItems() {
+    return this.orderService.getAllOrderItems();
+  }
+
   @Get('user')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
