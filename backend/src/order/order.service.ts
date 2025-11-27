@@ -38,6 +38,7 @@ export class OrderService {
           create: await Promise.all(
             cart.items.map(async (item: any) => {
               const { price, isRenewal, nextRenewalDate } = await this.purchaseHistoryService.calculatePrice(userId, item.productId);
+              const version = await this.prisma.productVersion.findUnique({ where: { id: item.versionId } });
               return {
                 productId: item.productId,
                 versionId: item.versionId,
@@ -45,6 +46,7 @@ export class OrderService {
                 price,
                 isRenewal,
                 nextRenewalDate,
+                licenseNo: this.generateNumericLicenseNumber(item.productId, userId),
               };
             })
           ),
@@ -54,6 +56,7 @@ export class OrderService {
         items: {
           include: {
             product: true,
+            version: true,
           },
         },
         user: {
@@ -61,6 +64,13 @@ export class OrderService {
             id: true,
             email: true,
             name: true,
+            phone: true,
+            company: true,
+            gstin: true,
+            address: true,
+            state: true,
+            city: true,
+            pincode: true,
           },
         },
       },
@@ -77,12 +87,43 @@ export class OrderService {
       });
     }
 
-    // Send to nanoreg service
+    // Send to nanoreg service for each item
     try {
-      await this.nanoregService.create({
-        Name: order.user.name || undefined,
-        Email: order.user.email || undefined,
-      });
+      await Promise.all(
+        order.items.map(async (item) => {
+          await this.nanoregService.create({
+            Name: order.user.name || undefined,
+            Company: order.user.company || undefined,
+            Email: order.user.email || undefined,
+            RegisterDate: new Date(),
+            MobileNo: order.user.phone || undefined,
+            State: order.user.state || undefined,
+            Address: order.user.address || order.shippingAddress,
+            Area: order.user.city || undefined,
+            Pincode: order.user.pincode || undefined,
+            GSTIN: order.user.gstin || undefined,
+            Active: 'Y',
+            IsPaid: 'Y',
+            PaymentDet: order.paymentMethod || undefined,
+            ActivatedOn: new Date().toISOString(),
+            
+            PaidAmt: item.price || undefined,
+            ValidUpTo: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+            ReceiptDate: new Date(),
+            InvNo: order.id || undefined,
+            InvDate: new Date(),
+            IsSurrendered: 'N',
+            DueAmt: 0,
+            IsMultiUser: item.version?.version === 'MULTI_USER' ? 'Y' : 'N',
+            IsServer: 'N',
+            IsAPIClient: 0,
+            IsLocalSales: 'Y',
+            license_no: item.licenseNo || undefined,
+            IsAccountsfirst: 'Y',
+            IsFinancialStatement: 'Y'
+          });
+        })
+      );
     } catch (error) {
       console.error('Failed to send to nanoreg:', error.message);
     }
@@ -109,6 +150,7 @@ export class OrderService {
             id: true,
             email: true,
             name: true,
+            phone: true,
           },
         },
       },
@@ -138,14 +180,6 @@ export class OrderService {
 
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
-    }
-
-    // Add license numbers to items
-    if (order.items) {
-      order.items = order.items.map(item => ({
-        ...item,
-        licenseNo: this.generateLicenseNumber(item.productId, order.userId, item.id, item.version?.version)
-      }));
     }
 
     return order;
@@ -248,13 +282,11 @@ export class OrderService {
 
 
  //total Revenue By Month Of CurrentYear, if not that month started send as null
-  private generateLicenseNumber(productId: number, userId: number, itemId: number, version?: string): string {
-    const versionCode = version === 'SINGLE_USER' ? 'SU' : version === 'MULTI_USER' ? 'MU' : 'ST';
-    const productCode = productId.toString().padStart(3, '0');
+  private generateNumericLicenseNumber(productId: number, userId: number): number {
+    const timestamp = Date.now().toString().slice(-6);
+    const productCode = productId.toString().padStart(2, '0');
     const userCode = userId.toString().padStart(3, '0');
-    const itemCode = itemId.toString().padStart(4, '0');
-    const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `${versionCode}-${productCode}-${userCode}-${itemCode}-${randomCode}`;
+    return parseInt(`${productCode}${userCode}${timestamp}`);
   }
 
   async totalRevenueByMonthOfCurrentYear() {

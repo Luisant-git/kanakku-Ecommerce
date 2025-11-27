@@ -27,7 +27,6 @@ model User {
   updatedAt DateTime @updatedAt
   carts     Cart[]
   orders    Order[]
-  demoDownloads DemoDownload[]
 }
 
 model Admin {
@@ -46,13 +45,11 @@ model Product {
   description String?
   productSource String?
   productSourceType String @default("url")
-  demo        String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   versions    ProductVersion[]
   cartItems   CartItem[]
   orderItems  OrderItem[]
-  demoDownloads DemoDownload[]
 }
 
 model ProductVersion {
@@ -119,20 +116,12 @@ model OrderItem {
   price     Float
   isRenewal Boolean  @default(false)
   nextRenewalDate DateTime?
+  licenseNo Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model DemoDownload {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  product   Product  @relation(fields: [productId], references: [id])
-  productId Int
-  createdAt DateTime @default(now())
-  
-  @@unique([userId, productId])
-}
+
 
 enum OrderStatus {
   PENDING

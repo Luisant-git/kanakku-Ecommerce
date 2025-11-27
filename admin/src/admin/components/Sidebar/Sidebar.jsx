@@ -41,12 +41,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               <span>Customers</span>
             </NavLink>
           </li>
-          <li>
-            <NavLink to="/admin/demo-downloads">
-              <FiFlag />
-              <span>Demo product</span>
-            </NavLink>
-          </li>
+
           <li>
             <NavLink to="/admin/sales-report">
               <FiTrendingUp />

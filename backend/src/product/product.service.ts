@@ -113,11 +113,6 @@ export class ProductService {
 
     // Delete related records first to avoid foreign key constraint violations
     await this.prisma.$transaction(async (prisma) => {
-      // Delete demo downloads
-      await prisma.demoDownload.deleteMany({
-        where: { productId: id },
-      });
-      
       // Delete product versions
       await prisma.productVersion.deleteMany({
         where: { productId: id },

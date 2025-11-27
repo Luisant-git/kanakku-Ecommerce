@@ -5,17 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class ProductAccessController {
   constructor(private prisma: PrismaService) {}
 
-  private generateLicenseNumber(
-    productId: number,
-    userId: number,
-    orderItemId: number,
-  ): string {
-    const productCode = productId.toString().padStart(3, '0');
-    const userCode = userId.toString().padStart(3, '0');
-    const itemCode = orderItemId.toString().padStart(4, '0');
-    const randomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `LIC-${productCode}-${userCode}-${itemCode}-${randomCode}`;
-  }
+
 
   @Get('debug/:userId')
   async debugUserOrders(@Param('userId') userId: string) {
@@ -83,19 +73,11 @@ export class ProductAccessController {
 
     console.log('Found completed purchase:', completedPurchase);
 
-    const licenseNo = completedPurchase
-      ? this.generateLicenseNumber(
-          parseInt(productId),
-          completedPurchase.order.userId,
-          completedPurchase.id,
-        )
-      : null;
-
     return {
       hasAccess: !!completedPurchase,
       productSource: completedPurchase?.product?.productSource,
       productSourceType: completedPurchase?.product?.productSourceType,
-      licenseNo: licenseNo,
+      licenseNo: completedPurchase?.licenseNo || null,
       purchasedVersionType: completedPurchase?.version?.version,
       purchasedVersionId: completedPurchase?.versionId,
       debug: {

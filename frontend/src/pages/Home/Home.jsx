@@ -53,10 +53,15 @@ import { getAllProductsApi } from '../../api/Product'
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const getAllProducts = async () => {
-    // API call to fetch products
-    const response = await getAllProductsApi();
-    console.log("all products", response);
-    setFeaturedProducts(response);
+    try {
+      // API call to fetch products
+      const response = await getAllProductsApi();
+      console.log("all products", response);
+      setFeaturedProducts(response);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setFeaturedProducts([]);
+    }
   };
 
   useEffect(() => {

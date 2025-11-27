@@ -16,7 +16,7 @@ import OrderAdd from "./admin/pages/OrderAdd/OrderAdd";
 import Customers from "./admin/pages/Customers/Customers";
 import CustomerDetails from "./admin/pages/CustomerDetails/CustomerDetails";
 import CustomerAdd from "./admin/pages/CustomerAdd/CustomerAdd";
-import DemoDownloads from "./admin/pages/DemoDownloads/DemoDownloads";
+
 import Reports from "./admin/pages/Reports/Reports";
 import Settings from "./admin/pages/Settings/Settings";
 import SalesReport from "./admin/pages/SalesReport/SalesReport";
@@ -47,7 +47,7 @@ function App() {
           <Route path="customers" element={<Customers />} />
           <Route path="customers/add" element={<CustomerAdd />} />
           <Route path="customers/:id" element={<CustomerDetails />} />
-          <Route path="demo-downloads" element={<DemoDownloads />} />
+
           <Route path="sales-report" element={<SalesReport />} />
           <Route path="renewal-report" element={<RenewalReport />} />
           {/* <Route path="analytics" element={<Analytics />} />

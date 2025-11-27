@@ -17,7 +17,7 @@ const Orders = () => {
     return apiOrders.map((order) => ({
       id: order.id,
       customer: order.user?.name || order.user?.email || "Unknown Customer",
-      email: order.user?.email || "",
+      phone: order.user?.phone || "",
       date: order.createdAt,
       amount: order.total,
       subtotal: order.subtotal,
@@ -31,6 +31,7 @@ const Orders = () => {
           ? "cancelled"
           : "pending",
       items: order.items,
+      licenseNumbers: order.items?.map(item => item.licenseNo) || [],
       shippingAddress: order.shippingAddress,
       paymentMethod: order.paymentMethod,
       createdAt: order.createdAt,
@@ -79,7 +80,7 @@ const orderStatusUpdate = async (id, status) => {
 
   const columns = [
     { key: "id", label: "Order ID", render: (value) => `#${value}` },
-    { key: "email", label: "Email" },
+    { key: "phone", label: "phone" },
     {
       key: "date",
       label: "Date",
@@ -114,6 +115,19 @@ const orderStatusUpdate = async (id, status) => {
           {row.items?.map((item, index) => (
             <div key={index} className="item-version">
               {item.product?.name} ({item.version?.version?.replace('_', ' ') || 'N/A'})
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: "licenseNo",
+      label: "License No",
+      render: (_, row) => (
+        <div className="license-info">
+          {row.items?.map((item, index) => (
+            <div key={index} className="license-item">
+              {item.licenseNo || 'N/A'}
             </div>
           ))}
         </div>

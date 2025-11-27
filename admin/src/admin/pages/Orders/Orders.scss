@@ -111,6 +111,23 @@
     }
   }
 
+  .license-info {
+    .license-item {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: $dark;
+      background-color: rgba($primary, 0.05);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      margin-bottom: 0.25rem;
+      border: 1px solid rgba($primary, 0.1);
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
   .actions {
     display: flex;
     gap: 0.5rem;

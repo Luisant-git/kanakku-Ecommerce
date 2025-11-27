@@ -8,7 +8,7 @@ import {
 } from "../../api/Product";
 import { addToCartApi, getCartCountApi } from "../../api/Cart";
 import { toast } from "react-toastify";
-import { recordDemoDownloadApi } from "../../api/Demo";
+
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -282,69 +282,32 @@ const ProductDetails = () => {
                 })()}
               </button>
 
-              {downloadAccess.hasAccess && downloadAccess.productSource && (
+              {product.productSource && (
                 <a
                   href={
-                    downloadAccess.productSourceType === "url"
-                      ? downloadAccess.productSource
-                      : `http://localhost:4010/uploads/${downloadAccess.productSource}`
+                    product.productSourceType === "url"
+                      ? product.productSource
+                      : `http://localhost:4010/uploads/${product.productSource}`
                   }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn--outline"
                   download={
-                    downloadAccess.productSourceType === "file"
-                      ? downloadAccess.productSource
+                    product.productSourceType === "file"
+                      ? product.productSource
                       : undefined
                   }
                 >
-                  {downloadAccess.productSourceType === "url"
-                    ? "Visit Product"
+                  {product.productSourceType === "url"
+                    ? "Download"
                     : "Download"}
                 </a>
               )}
 
-              {product.demo && !downloadAccess.hasAccess && (
-                <button
-                  className="btn btn--secondary"
-                  onClick={async () => {
-                    const token = localStorage.getItem("token");
-                    if (!token) {
-                      toast.error("Please login to continue...");
-                      navigate("/login");
-                      return;
-                    }
 
-                    try {
-                      await recordDemoDownloadApi(product.id);
-
-                      // If demo is a URL, open in new tab
-                      if (product.demo.startsWith("http")) {
-                        window.open(product.demo, "_blank");
-                      } else {
-                        // If demo is a file, download it
-                        const link = document.createElement("a");
-                        link.href = `http://localhost:4010/uploads/${product.demo}`;
-                        link.download = product.demo;
-                        link.click();
-                      }
-                    } catch (error) {
-                      console.error("Error recording demo download:", error);
-                    }
-                  }}
-                >
-                  Try Demo
-                </button>
-              )}
             </div>
 
-            {product.productSource &&
-              !downloadAccess.hasAccess &&
-              localStorage.getItem("token") && (
-                <div className="access-message">
-                  <small>Download available after purchase completion</small>
-                </div>
-              )}
+
 
             <div className="product-details__description">
               <h3>Description</h3>

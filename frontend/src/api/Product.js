@@ -1,4 +1,5 @@
 const apiUrl = import.meta.env.VITE_API_URL;
+console.log('API URL:', apiUrl);
 
 const createProductApi = async (productData) => {
   try {
@@ -18,18 +19,26 @@ const createProductApi = async (productData) => {
 const getAllProductsApi = async () => {
   try {
     const response = await fetch(`${apiUrl}/product`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     return response.json();
   } catch (error) {
     console.error("Error fetching products:", error);
+    throw error;
   }
 };
 
 const getProductByIdApi = async (productId) => {
   try {
     const response = await fetch(`${apiUrl}/product/${productId}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     return response.json();
   } catch (error) {
     console.error("Error fetching product by ID:", error);
+    throw error;
   }
 };
 
