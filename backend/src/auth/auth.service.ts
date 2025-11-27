@@ -168,7 +168,7 @@ export class AuthService {
   // OTP Login
   async otpLogin(
     otpLoginDto: OtpLoginDto,
-  ): Promise<{ token: string; user: any }> {
+  ): Promise<{ token?: string; user?: any; requiresRegistration?: boolean }> {
     const { phone, otp } = otpLoginDto;
 
     const user = await this.prisma.user.findUnique({
@@ -179,12 +179,20 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    if (!user.isVerified) {
-      throw new UnauthorizedException('Please complete registration first');
-    }
-
     if (user.otp !== otp || !user.otpExpiry || user.otpExpiry < new Date()) {
       throw new UnauthorizedException('Invalid or expired OTP');
+    }
+
+    // Check if user needs to complete registration
+    if (!user.isVerified || !user.name || !user.email) {
+      return {
+        requiresRegistration: true,
+        user: {
+          id: user.id,
+          phone: user.phone,
+          isVerified: user.isVerified,
+        },
+      };
     }
 
     // Clear OTP after successful login
@@ -230,26 +238,40 @@ export class AuthService {
   ): Promise<{ token: string; user: any }> {
     const { phone, ...userData } = userRegisterDto;
 
-    // Check if user exists and is verified via OTP
-    const existingUser = await this.prisma.user.findUnique({
+    console.log('Registration attempt for phone:', phone);
+
+    // Find user by phone (user should exist after OTP verification)
+    let existingUser = await this.prisma.user.findUnique({
       where: { phone },
     });
 
-    if (!existingUser) {
-      throw new NotFoundException(
-        'Please request OTP first to verify your phone',
-      );
+    // If not found, try without +91 prefix
+    if (!existingUser && phone.startsWith('+91')) {
+      const phoneWithoutPrefix = phone.substring(3);
+      existingUser = await this.prisma.user.findUnique({
+        where: { phone: phoneWithoutPrefix },
+      });
     }
 
-    if (!existingUser.otp) {
-      throw new BadRequestException(
-        'OTP verification required before registration',
+    // If still not found, try with +91 prefix
+    if (!existingUser && !phone.startsWith('+91')) {
+      const phoneWithPrefix = `+91${phone}`;
+      existingUser = await this.prisma.user.findUnique({
+        where: { phone: phoneWithPrefix },
+      });
+    }
+
+    console.log('Found user:', existingUser ? 'Yes' : 'No');
+
+    if (!existingUser) {
+      throw new NotFoundException(
+        'User not found. Please verify your phone number first.',
       );
     }
 
     // Update user with registration data and mark as verified
     const updatedUser = await this.prisma.user.update({
-      where: { phone },
+      where: { phone: existingUser.phone },
       data: {
         ...userData,
         isVerified: true,

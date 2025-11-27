@@ -17,8 +17,11 @@ const Login = () => {
     setLoading(true)
     setError('')
     
+    // Add +91 prefix if not present
+    const formattedPhone = phone.startsWith('+91') ? phone : `+91${phone}`
+    
     try {
-      const response = await sendOtpApi({ phone })
+      const response = await sendOtpApi({ phone: formattedPhone })
       if (response && response.message) {
         setMessage('OTP sent to your WhatsApp')
         setStep('otp')
@@ -37,7 +40,8 @@ const Login = () => {
     setError('')
     
     try {
-      const response = await otpLoginApi({ phone, otp })
+      const formattedPhone = phone.startsWith('+91') ? phone : `+91${phone}`
+      const response = await otpLoginApi({ phone: formattedPhone, otp })
       if (response && response.token) {
         localStorage.setItem('token', response.token)
         setMessage('Login successful!')
@@ -60,7 +64,8 @@ const Login = () => {
     setLoading(true)
     setError('')
     try {
-      const response = await sendOtpApi({ phone })
+      const formattedPhone = phone.startsWith('+91') ? phone : `+91${phone}`
+      const response = await sendOtpApi({ phone: formattedPhone })
       if (response && response.message) {
         setMessage('OTP resent to your WhatsApp')
       } else {
@@ -94,14 +99,17 @@ const Login = () => {
             <form onSubmit={handleSendOtp}>
               <div className="form-group">
                 <label htmlFor="phone">Phone Number</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Enter your phone number with country code"
-                  required
-                />
+                <div className="phone-input-wrapper">
+                  <span className="country-code">+91</span>
+                  <input
+                    type="tel"
+                    id="phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Enter your phone number"
+                    required
+                  />
+                </div>
               </div>
               
               <button type="submit" className="btn btn--primary btn--block" disabled={loading}>

@@ -74,6 +74,38 @@
       resize: vertical;
       min-height: 80px;
     }
+    
+    .phone-input-wrapper {
+      display: flex;
+      align-items: center;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+      
+      &:focus-within {
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+      }
+      
+      .country-code {
+        background: #f8f9fa;
+        padding: 0.8rem;
+        border-right: 1px solid #ddd;
+        font-weight: 500;
+        color: $dark-color;
+        white-space: nowrap;
+      }
+      
+      input {
+        border: none;
+        flex: 1;
+        
+        &:focus {
+          box-shadow: none;
+        }
+      }
+    }
   }
 
   .btn--block {
