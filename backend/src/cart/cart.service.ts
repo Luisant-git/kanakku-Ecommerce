@@ -36,24 +36,22 @@ export class CartService {
     if (!cart) {
       cart = await this.prisma.cart.create({ data: { userId } });
     }
-    let cartItem = await this.prisma.cartItem.findFirst({
-      where: { cartId: cart.id, productId: dto.productId, versionId: dto.versionId },
+
+    // Clear existing cart items to ensure only one item at a time
+    await this.prisma.cartItem.deleteMany({
+      where: { cartId: cart.id },
     });
-    if (cartItem) {
-      cartItem = await this.prisma.cartItem.update({
-        where: { id: cartItem.id },
-        data: { quantity: cartItem.quantity + dto.quantity },
-      });
-    } else {
-      cartItem = await this.prisma.cartItem.create({
-        data: {
-          cartId: cart.id,
-          productId: dto.productId,
-          versionId: dto.versionId,
-          quantity: dto.quantity,
-        },
-      });
-    }
+
+    // Add new item with quantity 1
+    const cartItem = await this.prisma.cartItem.create({
+      data: {
+        cartId: cart.id,
+        productId: dto.productId,
+        versionId: dto.versionId,
+        quantity: 1, // Force quantity to 1
+      },
+    });
+    
     return cartItem;
   }
 

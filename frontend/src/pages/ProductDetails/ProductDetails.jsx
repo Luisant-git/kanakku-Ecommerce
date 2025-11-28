@@ -6,13 +6,12 @@ import {
   checkDownloadAccessApi,
   getUserRenewalDateApi,
 } from "../../api/Product";
-import { addToCartApi, getCartCountApi } from "../../api/Cart";
 import { toast } from "react-toastify";
 
 
 const ProductDetails = () => {
   const { id } = useParams();
-  const [quantity, setQuantity] = useState(1);
+
   const [product, setProduct] = useState({});
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [downloadAccess, setDownloadAccess] = useState({ hasAccess: false });
@@ -62,47 +61,9 @@ const ProductDetails = () => {
     setLoading(false);
   };
 
-  const handleAddToCart = async (product) => {
-    setLoading(true);
-    try {
-      const data = {
-        productId: product.id,
-        versionId: selectedVersion?.id,
-        quantity: quantity,
-      };
-      console.log("version----check--", data);
 
-      const response = await addToCartApi(data);
-      if (response) {
-        const isRenewal =
-          downloadAccess.hasAccess &&
-          selectedVersion?.paymentRenewal !== "ONE_TIME" &&
-          !(
-            purchasedVersionType === "MULTI_USER" &&
-            selectedVersion?.version === "SINGLE_USER"
-          );
-        toast.success(
-          isRenewal ? "Renewal added to cart" : "Product added to cart"
-        );
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-    setLoading(false);
-  };
 
-  const checkRenewalStatus = async () => {
-    // This would be called from a new API endpoint
-    // For now, we'll show renewal info if priceRenewal exists
-    return product.priceRenewal ? true : false;
-  };
 
-  const handleQuantityChange = (e) => {
-    const value = parseInt(e.target.value);
-    if (value > 0) {
-      setQuantity(value);
-    }
-  };
 
   useEffect(() => {
     getProductById(id);
@@ -229,17 +190,7 @@ const ProductDetails = () => {
               )}
             </div>
 
-            {/* <div className="product-details__quantity">
-              <label htmlFor="quantity">Quantity:</label>
-              <input
-                type="number"
-                id="quantity"
-                min="1"
-                value={quantity}
-                onChange={handleQuantityChange}
-                disabled
-              />
-            </div> */}
+
 
             <div className="product-details__actions">
               <button
@@ -251,8 +202,19 @@ const ProductDetails = () => {
                     navigate("/login");
                     return;
                   }
-                  await handleAddToCart(product);
-                  navigate("/cart");
+                  
+                  if (!selectedVersion) {
+                    toast.error("Please select a version");
+                    return;
+                  }
+                  
+                  // Navigate directly to checkout with product data
+                  navigate("/checkout", {
+                    state: {
+                      product: product,
+                      selectedVersion: selectedVersion
+                    }
+                  });
                 }}
                 disabled={
                   downloadAccess.hasAccess &&
@@ -276,32 +238,41 @@ const ProductDetails = () => {
                       selectedVersion?.version === "SINGLE_USER"
                     )
                   ) {
-                    return "Add Renewal to Cart";
+                    return "Buy Renewal Now";
                   }
-                  return "Add to Cart";
+                  return "Buy Now";
                 })()}
               </button>
 
               {product.productSource && (
-                <a
-                  href={
-                    product.productSourceType === "url"
-                      ? product.productSource
-                      : `http://localhost:4010/uploads/${product.productSource}`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
                   className="btn btn--outline"
-                  download={
-                    product.productSourceType === "file"
+                  onClick={() => {
+                    const token = localStorage.getItem("token");
+                    if (!token) {
+                      toast.error("Please login to download");
+                      navigate("/login");
+                      return;
+                    }
+                    
+                    const downloadUrl = product.productSourceType === "url"
                       ? product.productSource
-                      : undefined
-                  }
+                      : `http://localhost:4010/uploads/${product.productSource}`;
+                    
+                    if (product.productSourceType === "url") {
+                      window.open(downloadUrl, "_blank");
+                    } else {
+                      const link = document.createElement("a");
+                      link.href = downloadUrl;
+                      link.download = product.productSource;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
+                  }}
                 >
-                  {product.productSourceType === "url"
-                    ? "Download"
-                    : "Download"}
-                </a>
+                  Download
+                </button>
               )}
 
 

@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import './Checkout.scss'
-import { getCartApi } from '../../api/Cart';
-import { createOrderApi } from '../../api/Order';
+import { createDirectOrderApi } from '../../api/Order';
 import { getUserProfileApi } from '../../api/Profile';
 import Loading from '../../components/Loading/Loading';
 import { toast } from 'react-toastify';
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { product, selectedVersion } = location.state || {};
+  
   const [formData, setFormData] = useState({
     // firstName: '',
     // lastName: '',
@@ -21,7 +23,6 @@ const Checkout = () => {
     paymentMethod: 'credit_card'
   })
 
-  const [cartItems, setCartItems] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
   const [tax, setTax] = useState(0);
   const [total, setTotal] = useState(0);
@@ -31,15 +32,15 @@ const Checkout = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('');
 
-  const getCartItems = async () => {
-    try {
-      const response = await getCartApi();
-      setCartItems(response?.items || []);
-      setSubtotal(response?.subtotal || 0);
-      setTax(response?.tax || 0);
-      setTotal(response?.total || 0);
-    } catch (error) {
-      console.error('Error fetching cart:', error);
+  const calculateOrderTotals = () => {
+    if (selectedVersion) {
+      const itemSubtotal = selectedVersion.price;
+      const itemTax = itemSubtotal * 0.1;
+      const itemTotal = itemSubtotal + itemTax;
+      
+      setSubtotal(itemSubtotal);
+      setTax(itemTax);
+      setTotal(itemTotal);
     }
   };
 
@@ -61,7 +62,12 @@ const Checkout = () => {
   };
 
   useEffect(() => {
-    getCartItems();
+    if (!product || !selectedVersion) {
+      toast.error('Invalid product selection');
+      navigate('/products');
+      return;
+    }
+    calculateOrderTotals();
     getUserProfile();
   }, []);
 
@@ -134,26 +140,22 @@ const Checkout = () => {
       return;
     }
 
-    if (cartItems.length === 0) {
-      setOrderError('Your cart is empty');
-      toast.error('Your cart is empty')
+    if (!product || !selectedVersion) {
+      setOrderError('Invalid product selection');
+      toast.error('Invalid product selection');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Format data for API
       const orderData = {
-        items: cartItems.map(item => ({
-          productId: item.product.id,
-          quantity: item.quantity
-        })),
+        productId: product.id,
+        versionId: selectedVersion.id,
         shippingAddress: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zip}`,
         paymentMethod: formData.paymentMethod
       };
-
-      const response = await createOrderApi(orderData);
+      const response = await createDirectOrderApi(orderData);
       
       if (response) {
         // Redirect to order confirmation page
@@ -336,12 +338,13 @@ const Checkout = () => {
           <div className="order-summary">
             <h2>Order Summary</h2>
             <div className="summary-items">
-              {cartItems.map((item) => (
-                  <div key={item._id} className="summary-item">
-                    <span>{item.product.name}</span>
-                    <span>₹{item.effectivePrice || item.version?.price || item.product.versions?.[0]?.price}</span>
-                  </div>
-                ))}
+              <div className="summary-item">
+                <div className="item-details">
+                  <span>{product?.name}</span>
+                  <small>{selectedVersion?.version.replace("_", " ")}</small>
+                </div>
+                <span>₹{selectedVersion?.price.toLocaleString()}</span>
+              </div>
             </div>
             <div className="summary-totals">
               <div className="summary-row">

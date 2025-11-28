@@ -1,8 +1,12 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateOrderDto } from './dto/create-order.dto';
+import { CreateDirectOrderDto } from './dto/create-direct-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { CartService } from '../cart/cart.service';
+
 import { NanoregService } from '../nanoreg/nanoreg.service';
 import { PurchaseHistoryService } from './purchase-history.service';
 
@@ -10,46 +14,73 @@ import { PurchaseHistoryService } from './purchase-history.service';
 export class OrderService {
   constructor(
     private prisma: PrismaService,
-    private cartService: CartService,
     private nanoregService: NanoregService,
     private purchaseHistoryService: PurchaseHistoryService,
   ) {}
 
-  async create(userId: number, createOrderDto: CreateOrderDto) {
-    const { shippingAddress, paymentMethod } = createOrderDto;
+  async createDirect(
+    userId: number,
+    createDirectOrderDto: CreateDirectOrderDto,
+  ) {
+    const { productId, versionId, shippingAddress, paymentMethod } =
+      createDirectOrderDto;
 
-    // Get cart details (including subtotal, tax, total, items)
-    const cart = await this.cartService.getCart(userId);
+    // Get product and version details
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      include: { versions: true },
+    });
 
-    if (!cart || !cart.items.length) {
-      throw new BadRequestException('Cart is empty.');
+    if (!product) {
+      throw new NotFoundException('Product not found');
     }
 
-    // Create order using cart values
+    const version = product.versions.find((v) => v.id === versionId);
+    if (!version) {
+      throw new BadRequestException(
+        'Invalid version selected for this product',
+      );
+    }
+
+    // Check if user already purchased this product (for ONE_TIME products)
+    const hasPurchased =
+      await this.purchaseHistoryService.hasUserPurchasedProduct(
+        userId,
+        productId,
+      );
+    if (hasPurchased && version.paymentRenewal === 'ONE_TIME') {
+      throw new BadRequestException('This product can only be purchased once');
+    }
+
+    // Calculate pricing
+    const { price, isRenewal, nextRenewalDate } =
+      await this.purchaseHistoryService.calculatePrice(userId, productId);
+
+    // Calculate totals (quantity is always 1 for direct orders)
+    const subtotal = price;
+    const taxRate = 0.1;
+    const tax = subtotal * taxRate;
+    const total = subtotal + tax;
+
+    // Create order with single item
     const order = await this.prisma.order.create({
       data: {
         userId,
-        subtotal: cart.subtotal,
-        tax: cart.tax,
-        total: cart.total,
+        subtotal,
+        tax,
+        total,
         shippingAddress,
         paymentMethod,
         items: {
-          create: await Promise.all(
-            cart.items.map(async (item: any) => {
-              const { price, isRenewal, nextRenewalDate } = await this.purchaseHistoryService.calculatePrice(userId, item.productId);
-              const version = await this.prisma.productVersion.findUnique({ where: { id: item.versionId } });
-              return {
-                productId: item.productId,
-                versionId: item.versionId,
-                quantity: item.quantity,
-                price,
-                isRenewal,
-                nextRenewalDate,
-                licenseNo: this.generateNumericLicenseNumber(item.productId, userId),
-              };
-            })
-          ),
+          create: {
+            productId,
+            versionId,
+            quantity: 1, // Always 1 for direct orders
+            price,
+            isRenewal,
+            nextRenewalDate,
+            licenseNo: this.generateNumericLicenseNumber(productId, userId),
+          },
         },
       },
       include: {
@@ -76,64 +107,47 @@ export class OrderService {
       },
     });
 
-    // Clear user's cart after placing order
-    const userCart = await this.prisma.cart.findFirst({
-      where: { userId },
-    });
-
-    if (userCart) {
-      await this.prisma.cartItem.deleteMany({
-        where: { cartId: userCart.id },
-      });
-    }
-
-    // Send to nanoreg service for each item
+    // Send to nanoreg service
     try {
-      await Promise.all(
-        order.items.map(async (item) => {
-          await this.nanoregService.create({
-            Name: order.user.name || undefined,
-            Company: order.user.company || undefined,
-            Email: order.user.email || undefined,
-            RegisterDate: new Date(),
-            MobileNo: order.user.phone || undefined,
-            State: order.user.state || undefined,
-            Address: order.user.address || order.shippingAddress,
-            Area: order.user.city || undefined,
-            Pincode: order.user.pincode || undefined,
-            GSTIN: order.user.gstin || undefined,
-            Active: 'Y',
-            IsPaid: 'Y',
-            PaymentDet: order.paymentMethod || undefined,
-            ActivatedOn: new Date().toISOString(),
-            
-            PaidAmt: item.price || undefined,
-            ValidUpTo: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-            ReceiptDate: new Date(),
-            InvNo: order.id || undefined,
-            InvDate: new Date(),
-            IsSurrendered: 'N',
-            DueAmt: 0,
-            IsMultiUser: item.version?.version === 'MULTI_USER' ? 'Y' : 'N',
-            IsServer: 'N',
-            IsAPIClient: 0,
-            IsLocalSales: 'Y',
-            license_no: item.licenseNo || undefined,
-            IsAccountsfirst: 'Y',
-            IsFinancialStatement: 'Y'
-          });
-        })
-      );
+      await this.nanoregService.create({
+        Name: order.user.name || undefined,
+        Company: order.user.company || undefined,
+        Email: order.user.email || undefined,
+        RegisterDate: new Date(),
+        MobileNo: order.user.phone || undefined,
+        State: order.user.state || undefined,
+        Address: order.user.address || order.shippingAddress,
+        Area: order.user.city || undefined,
+        Pincode: order.user.pincode || undefined,
+        GSTIN: order.user.gstin || undefined,
+        Active: 'Y',
+        IsPaid: 'Y',
+        PaymentDet: order.paymentMethod || undefined,
+        ActivatedOn: new Date().toISOString(),
+
+        PaidAmt: order.items[0].price || undefined,
+        ValidUpTo: new Date(
+          new Date().setFullYear(new Date().getFullYear() + 1),
+        ),
+        ReceiptDate: new Date(),
+        InvNo: order.id || undefined,
+        InvDate: new Date(),
+        IsSurrendered: 'N',
+        DueAmt: 0,
+        IsMultiUser:
+          order.items[0].version?.version === 'MULTI_USER' ? 'Y' : 'N',
+        IsServer: 'N',
+        IsAPIClient: 0,
+        IsLocalSales: 'Y',
+        license_no: order.items[0].licenseNo || undefined,
+        IsAccountsfirst: 'Y',
+        IsFinancialStatement: 'Y',
+      });
     } catch (error) {
       console.error('Failed to send to nanoreg:', error.message);
     }
 
-    return {
-      ...order,
-      subtotal: cart.subtotal,
-      tax: cart.tax,
-      total: cart.total,
-    };
+    return order;
   }
 
   async findAll() {
@@ -148,9 +162,15 @@ export class OrderService {
         user: {
           select: {
             id: true,
-            email: true,
             name: true,
+            email: true,
             phone: true,
+            company: true,
+            gstin: true,
+            address: true,
+            state: true,
+            city: true,
+            pincode: true,
           },
         },
       },
@@ -246,7 +266,7 @@ export class OrderService {
   async totalOrders() {
     return this.prisma.order.count();
   }
-  
+
   //calculate only status completed orders sales amount
   async totalSales() {
     const completedOrders = await this.prisma.order.findMany({
@@ -280,43 +300,15 @@ export class OrderService {
     });
   }
 
-
- //total Revenue By Month Of CurrentYear, if not that month started send as null
-  private generateNumericLicenseNumber(productId: number, userId: number): number {
+  //total Revenue By Month Of CurrentYear, if not that month started send as null
+  private generateNumericLicenseNumber(
+    productId: number,
+    userId: number,
+  ): number {
     const timestamp = Date.now().toString().slice(-6);
     const productCode = productId.toString().padStart(2, '0');
     const userCode = userId.toString().padStart(3, '0');
     return parseInt(`${productCode}${userCode}${timestamp}`);
-  }
-
-  async getAllOrderItems() {
-    const items = await this.prisma.orderItem.findMany({
-      include: {
-        product: true,
-        version: true,
-        order: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-                company: true,
-                gstin: true,
-                address: true,
-                state: true,
-                city: true,
-                pincode: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-    console.log('Order items found:', items.length);
-    return items;
   }
 
   async totalRevenueByMonthOfCurrentYear() {

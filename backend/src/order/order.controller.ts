@@ -16,7 +16,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { OrderService } from './order.service';
-import { CreateOrderDto } from './dto/create-order.dto';
+import { CreateDirectOrderDto } from './dto/create-direct-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -28,11 +28,11 @@ export class OrderController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Create a new order' })
+  @ApiOperation({ summary: 'Create a direct order' })
   @ApiResponse({ status: 201, description: 'Order created successfully.' })
-  create(@Request() req, @Body() createOrderDto: CreateOrderDto) {
+  create(@Request() req, @Body() createDirectOrderDto: CreateDirectOrderDto) {
     const userId = req.user.userId;
-    return this.orderService.create(Number(userId), createOrderDto);
+    return this.orderService.createDirect(Number(userId), createDirectOrderDto);
   }
 
   @Get()
@@ -83,13 +83,6 @@ export class OrderController {
   @ApiResponse({ status: 200, description: 'Revenue by month.' })
   revenueByMonth() {
     return this.orderService.totalRevenueByMonthOfCurrentYear();
-  }
-
-  @Get('items')
-  @ApiOperation({ summary: 'Get all order items' })
-  @ApiResponse({ status: 200, description: 'List of all order items.' })
-  getAllOrderItems() {
-    return this.orderService.getAllOrderItems();
   }
 
   @Get('user')

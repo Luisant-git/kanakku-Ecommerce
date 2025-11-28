@@ -69,15 +69,7 @@ const Cart = () => {
                       )}
                     </div>
                   </div>
-                  {/* <div className="cart-item__quantity">
-                    <input
-                      type="number"
-                      min="1"
-                      value={1}
-                      readOnly
-                      disabled
-                    />
-                  </div> */}
+
                   <div className="cart-item__total">
                     ₹{item.effectivePrice || item.product.price}
                   </div>

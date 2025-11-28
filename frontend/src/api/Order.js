@@ -9,16 +9,21 @@ const getAuthHeaders = () => {
   };
 };
 
-const createOrderApi = async (orderData) => {
+const createDirectOrderApi = async (orderData) => {
   try {
     const response = await fetch(`${apiUrl}/orders`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify(orderData),
     });
-    return response.json();
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create order');
+    }
+    return data;
   } catch (error) {
-    console.error("Error creating order:", error);
+    console.error("Error creating direct order:", error);
+    throw error;
   }
 };
 
@@ -34,4 +39,4 @@ const getOrdersByUserApi = async () => {
   }
 };
 
-export { createOrderApi, getOrdersByUserApi}
+export { createDirectOrderApi, getOrdersByUserApi}
