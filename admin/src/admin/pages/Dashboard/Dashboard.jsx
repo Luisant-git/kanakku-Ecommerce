@@ -132,19 +132,6 @@ const Dashboard = () => {
     <div className="dashboard">
       <div className="page-header">
         <h1>Dashboard</h1>
-        <div className="header-actions">
-          <div className="search-bar">
-            <FiSearch className="search-icon" />
-            <input type="text" placeholder="Search..." />
-          </div>
-          <button className="date-btn">
-            <FiCalendar />
-            <span>30 May</span>
-          </button>
-          <button className="icon-btn">
-            <FiBell />
-          </button>
-        </div>
       </div>
       
       <div className="stats-grid">
