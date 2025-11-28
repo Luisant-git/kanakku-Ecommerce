@@ -53,6 +53,7 @@
       display: flex;
       gap: 2rem;
       list-style: none;
+      align-items: center;
 
       li {
         a {
@@ -91,13 +92,14 @@
 
             .profile-icon {
               font-size: 1.2rem;
-              background: pink;
+              background: $primary-color;
               border-radius: 50%;
               width: 32px;
               height: 32px;
               display: flex;
               align-items: center;
               justify-content: center;
+              color: white;
             }
 
             &:hover {

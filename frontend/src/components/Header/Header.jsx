@@ -2,23 +2,18 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import Logo from '../../assets/kanakku.png'
 import './Header.scss'
-import { getCartCountApi } from '../../api/Cart'
+
 import { useAuth } from '../../context/AuthContext'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [cartCount, setCartCount] = useState(0)
+
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const { user, logout, isLogin } = useAuth()
   const navigate = useNavigate()
 
-  const getCartCount = async () => {
-    const response = await getCartCountApi();
-    console.log(response);
-    
-    setCartCount(response?.count);
-  }
+
 
   const closeMenu = () => {
     setIsMenuOpen(false)
@@ -36,9 +31,7 @@ const Header = () => {
     setShowLogoutModal(false)
   }
 
-  useEffect(() => {
-    getCartCount()
-  }, [])
+
 
   return (
     <header className="header">
@@ -62,7 +55,6 @@ const Header = () => {
               <li><Link to="/products" onClick={closeMenu}>Products</Link></li>
               <li><Link to="/about" onClick={closeMenu}>About Us</Link></li>
               <li><Link to="/contact" onClick={closeMenu}>Contact</Link></li>
-              <li><Link to="/cart" style={{ padding: '10px 40px'}} className="cart-link" onClick={closeMenu}>Cart</Link></li>
               <li className="profile-dropdown">
                 <button 
                   className="profile-btn" 

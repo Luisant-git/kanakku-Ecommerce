@@ -85,6 +85,7 @@ const MyOrders = ({ orders }) => {
                   <div className="item-details">
                     <h4>{item.product.name}</h4>
                     <p className="item-version">{item.version?.version?.replace('_', ' ') || 'Standard'}</p>
+                    <p className="item-license"><strong>License No:</strong> {item.licenseNo}</p>
                     <p className="item-price">₹{item.price}</p>
                   </div>
                 </div>
