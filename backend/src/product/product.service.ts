@@ -131,4 +131,36 @@ export class ProductService {
     const renewalDate = await this.purchaseHistoryService.getUserNextRenewalDate(userId, productId);
     return { nextRenewalDate: renewalDate };
   }
+
+  async checkDownloadAccess(userId: number, productId: number) {
+    const hasPurchased = await this.purchaseHistoryService.hasUserPurchasedProduct(userId, productId);
+    
+    if (!hasPurchased) {
+      return { hasAccess: false };
+    }
+
+    // Get the most recent purchase to determine version type
+    const lastPurchase = await this.prisma.orderItem.findFirst({
+      where: {
+        productId,
+        order: {
+          userId,
+          status: 'COMPLETED'
+        }
+      },
+      include: {
+        version: true,
+        order: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return {
+      hasAccess: true,
+      licenseNo: lastPurchase?.licenseNo,
+      purchasedVersionType: lastPurchase?.version?.version
+    };
+  }
 }

@@ -70,7 +70,7 @@ const deleteProductApi = async (productId) => {
 
 const checkDownloadAccessApi = async (productId, userId) => {
   try {
-    const response = await fetch(`${apiUrl}/product-access/${productId}/download-access?userId=${userId}`);
+    const response = await fetch(`${apiUrl}/product/${productId}/download-access?userId=${userId}`);
     return response.json();
   } catch (error) {
     console.error('Error checking download access:', error);

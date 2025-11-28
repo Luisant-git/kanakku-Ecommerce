@@ -42,19 +42,20 @@ export class OrderService {
       );
     }
 
-    // Check if user already purchased this product (for ONE_TIME products)
-    const hasPurchased =
-      await this.purchaseHistoryService.hasUserPurchasedProduct(
+    // Check if user already purchased this version (for ONE_TIME products)
+    const hasPurchasedVersion =
+      await this.purchaseHistoryService.hasUserPurchasedVersion(
         userId,
         productId,
+        versionId,
       );
-    if (hasPurchased && version.paymentRenewal === 'ONE_TIME') {
-      throw new BadRequestException('This product can only be purchased once');
+    if (hasPurchasedVersion && version.paymentRenewal === 'ONE_TIME') {
+      throw new BadRequestException('This version can only be purchased once');
     }
 
     // Calculate pricing
     const { price, isRenewal, nextRenewalDate } =
-      await this.purchaseHistoryService.calculatePrice(userId, productId);
+      await this.purchaseHistoryService.calculatePrice(userId, productId, versionId);
 
     // Calculate totals (quantity is always 1 for direct orders)
     const subtotal = price;
@@ -148,6 +149,10 @@ export class OrderService {
     }
 
     return order;
+  }
+
+  async calculatePrice(userId: number, productId: number, versionId: number) {
+    return this.purchaseHistoryService.calculatePrice(userId, productId, versionId);
   }
 
   async findAll() {

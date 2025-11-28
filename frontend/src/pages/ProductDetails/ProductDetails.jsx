@@ -218,25 +218,22 @@ const ProductDetails = () => {
                 }}
                 disabled={
                   downloadAccess.hasAccess &&
-                  (selectedVersion?.paymentRenewal === "ONE_TIME" ||
-                    (purchasedVersionType === "MULTI_USER" &&
-                      selectedVersion?.version === "SINGLE_USER"))
+                  downloadAccess.purchasedVersionType === selectedVersion?.version &&
+                  selectedVersion?.paymentRenewal === "ONE_TIME"
                 }
               >
                 {(() => {
                   if (
                     downloadAccess.hasAccess &&
+                    downloadAccess.purchasedVersionType === selectedVersion?.version &&
                     selectedVersion?.paymentRenewal === "ONE_TIME"
                   ) {
                     return "Already Purchased";
                   }
                   if (
                     downloadAccess.hasAccess &&
-                    selectedVersion?.paymentRenewal !== "ONE_TIME" &&
-                    !(
-                      purchasedVersionType === "MULTI_USER" &&
-                      selectedVersion?.version === "SINGLE_USER"
-                    )
+                    downloadAccess.purchasedVersionType === selectedVersion?.version &&
+                    selectedVersion?.paymentRenewal !== "ONE_TIME"
                   ) {
                     return "Buy Renewal Now";
                   }

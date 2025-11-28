@@ -59,4 +59,11 @@ export class ProductController {
     const userId = req.user.userId;
     return this.productService.getUserRenewalDate(Number(userId), Number(id));
   }
+
+  @Get(':id/download-access')
+  @ApiOperation({ summary: 'Check user download access for product' })
+  checkDownloadAccess(@Param('id') id: number, @Request() req) {
+    const userId = req.query.userId;
+    return this.productService.checkDownloadAccess(Number(userId), Number(id));
+  }
 }

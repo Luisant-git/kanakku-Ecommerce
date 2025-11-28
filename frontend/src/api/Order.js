@@ -9,6 +9,24 @@ const getAuthHeaders = () => {
   };
 };
 
+const calculatePriceApi = async (productId, versionId) => {
+  try {
+    const response = await fetch(`${apiUrl}/orders/calculate-price`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ productId, versionId }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to calculate price');
+    }
+    return data;
+  } catch (error) {
+    console.error("Error calculating price:", error);
+    throw error;
+  }
+};
+
 const createDirectOrderApi = async (orderData) => {
   try {
     const response = await fetch(`${apiUrl}/orders`, {
@@ -39,4 +57,4 @@ const getOrdersByUserApi = async () => {
   }
 };
 
-export { createDirectOrderApi, getOrdersByUserApi}
+export { calculatePriceApi, createDirectOrderApi, getOrdersByUserApi}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import './Checkout.scss'
-import { createDirectOrderApi } from '../../api/Order';
+import { calculatePriceApi, createDirectOrderApi } from '../../api/Order';
 import { getUserProfileApi } from '../../api/Profile';
 import Loading from '../../components/Loading/Loading';
 import { toast } from 'react-toastify';
@@ -26,21 +26,40 @@ const Checkout = () => {
   const [subtotal, setSubtotal] = useState(0);
   const [tax, setTax] = useState(0);
   const [total, setTotal] = useState(0);
+  const [isRenewal, setIsRenewal] = useState(false);
+  const [actualPrice, setActualPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [orderError, setOrderError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('');
 
-  const calculateOrderTotals = () => {
-    if (selectedVersion) {
-      const itemSubtotal = selectedVersion.price;
-      const itemTax = itemSubtotal * 0.1;
-      const itemTotal = itemSubtotal + itemTax;
-      
-      setSubtotal(itemSubtotal);
-      setTax(itemTax);
-      setTotal(itemTotal);
+  const calculateOrderTotals = async () => {
+    if (selectedVersion && product) {
+      try {
+        const priceData = await calculatePriceApi(product.id, selectedVersion.id);
+        const itemSubtotal = priceData.price;
+        const itemTax = itemSubtotal * 0.1;
+        const itemTotal = itemSubtotal + itemTax;
+        
+        setSubtotal(itemSubtotal);
+        setTax(itemTax);
+        setTotal(itemTotal);
+        setIsRenewal(priceData.isRenewal);
+        setActualPrice(priceData.price);
+      } catch (error) {
+        console.error('Error calculating price:', error);
+        // Fallback to version price
+        const itemSubtotal = selectedVersion.price;
+        const itemTax = itemSubtotal * 0.1;
+        const itemTotal = itemSubtotal + itemTax;
+        
+        setSubtotal(itemSubtotal);
+        setTax(itemTax);
+        setTotal(itemTotal);
+        setIsRenewal(false);
+        setActualPrice(selectedVersion.price);
+      }
     }
   };
 
@@ -62,13 +81,17 @@ const Checkout = () => {
   };
 
   useEffect(() => {
-    if (!product || !selectedVersion) {
-      toast.error('Invalid product selection');
-      navigate('/products');
-      return;
-    }
-    calculateOrderTotals();
-    getUserProfile();
+    const initializeCheckout = async () => {
+      if (!product || !selectedVersion) {
+        toast.error('Invalid product selection');
+        navigate('/products');
+        return;
+      }
+      await calculateOrderTotals();
+      getUserProfile();
+    };
+    
+    initializeCheckout();
   }, []);
 
   const handleChange = (e) => {
@@ -341,9 +364,9 @@ const Checkout = () => {
               <div className="summary-item">
                 <div className="item-details">
                   <span>{product?.name}</span>
-                  <small>{selectedVersion?.version.replace("_", " ")}</small>
+                  <small>{selectedVersion?.version.replace("_", " ")}{isRenewal && " (Renewal)"}</small>
                 </div>
-                <span>₹{selectedVersion?.price.toLocaleString()}</span>
+                <span>₹{actualPrice.toLocaleString()}</span>
               </div>
             </div>
             <div className="summary-totals">
@@ -353,11 +376,11 @@ const Checkout = () => {
               </div>
               <div className="summary-row">
                 <span>GST (10%)</span>
-                <span>₹{tax}</span>
+                <span>₹{Math.round(tax * 100) / 100}</span>
               </div>
               <div className="summary-row total">
                 <span>Total</span>
-                <span>₹{total}</span>
+                <span>₹{Math.round(total * 100) / 100}</span>
               </div>
             </div>
           </div>

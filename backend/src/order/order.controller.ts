@@ -25,6 +25,16 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
+  @Post('calculate-price')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Calculate order price' })
+  @ApiResponse({ status: 200, description: 'Price calculated successfully.' })
+  calculatePrice(@Request() req, @Body() body: { productId: number; versionId: number }) {
+    const userId = req.user.userId;
+    return this.orderService.calculatePrice(Number(userId), body.productId, body.versionId);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
