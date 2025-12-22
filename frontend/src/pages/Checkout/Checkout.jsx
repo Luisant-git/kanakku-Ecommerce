@@ -38,9 +38,10 @@ const Checkout = () => {
     if (selectedVersion && product) {
       try {
         const priceData = await calculatePriceApi(product.id, selectedVersion.id);
-        const itemSubtotal = priceData.price;
-        const itemTax = itemSubtotal * 0.1;
-        const itemTotal = itemSubtotal + itemTax;
+        const itemTotal = priceData.price;
+        const taxRate = product.taxPercentage || 18;
+        const itemTax = itemTotal * (taxRate / (100 + taxRate));
+        const itemSubtotal = itemTotal - itemTax;
         
         setSubtotal(itemSubtotal);
         setTax(itemTax);
@@ -50,9 +51,10 @@ const Checkout = () => {
       } catch (error) {
         console.error('Error calculating price:', error);
         // Fallback to version price
-        const itemSubtotal = selectedVersion.price;
-        const itemTax = itemSubtotal * 0.1;
-        const itemTotal = itemSubtotal + itemTax;
+        const itemTotal = selectedVersion.price;
+        const taxRate = product.taxPercentage || 18;
+        const itemTax = itemTotal * (taxRate / (100 + taxRate));
+        const itemSubtotal = itemTotal - itemTax;
         
         setSubtotal(itemSubtotal);
         setTax(itemTax);
@@ -372,10 +374,10 @@ const Checkout = () => {
             <div className="summary-totals">
               <div className="summary-row">
                 <span>Subtotal</span>
-                <span>₹{subtotal}</span>
+                <span>₹{Math.round(subtotal * 100) / 100}</span>
               </div>
               <div className="summary-row">
-                <span>GST (10%)</span>
+                <span>GST ({product?.taxPercentage || 18}%)</span>
                 <span>₹{Math.round(tax * 100) / 100}</span>
               </div>
               <div className="summary-row total">

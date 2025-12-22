@@ -42,6 +42,7 @@ const ProductEdit = () => {
         setFormData({
           name: product.name || "",
           description: product.description || "",
+          taxPercentage: product.taxPercentage?.toString() || "18",
           singleUserPrice: singleUserVersion?.price?.toString() || "",
           singleUserRenewalPrice: singleUserVersion?.renewalPrice?.toString() || "",
           singleUserPaymentRenewal: singleUserVersion?.paymentRenewal || "ONE_TIME",
@@ -158,6 +159,7 @@ const ProductEdit = () => {
     const productPayload = {
       name: formData.name,
       description: formData.description,
+      taxPercentage: parseFloat(formData.taxPercentage),
       productSource: productSourceUrl || null,
       productSourceType: formData.productSourceType,
       imageUrl: imageUrls,
@@ -281,6 +283,18 @@ const ProductEdit = () => {
                 value={formData.description}
                 onChange={handleChange}
                 rows="5"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Tax Percentage (%)</label>
+              <input
+                type="number"
+                step="0.01"
+                name="taxPercentage"
+                placeholder="18"
+                value={formData.taxPercentage}
+                onChange={handleChange}
               />
             </div>
 

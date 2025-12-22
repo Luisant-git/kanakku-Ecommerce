@@ -45,6 +45,7 @@ model Product {
   description String?
   productSource String?
   productSourceType String @default("url")
+  taxPercentage Float @default(18)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   versions    ProductVersion[]

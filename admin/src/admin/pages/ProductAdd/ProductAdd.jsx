@@ -11,6 +11,7 @@ const ProductAdd = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    taxPercentage: "18",
     singleUserPrice: "",
     singleUserRenewalPrice: "",
     singleUserPaymentRenewal: "ONE_TIME",
@@ -98,6 +99,7 @@ const ProductAdd = () => {
     const productPayload = {
       name: formData.name,
       description: formData.description,
+      taxPercentage: parseFloat(formData.taxPercentage),
       imageUrl: imageUrls,
       productSource: productSourceUrl || null,
       productSourceType: formData.productSourceType,
@@ -166,6 +168,18 @@ const ProductAdd = () => {
               value={formData.description}
               onChange={handleChange}
               rows="4"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Tax Percentage (%)</label>
+            <input
+              type="number"
+              step="0.01"
+              name="taxPercentage"
+              placeholder="18"
+              value={formData.taxPercentage}
+              onChange={handleChange}
             />
           </div>
 
