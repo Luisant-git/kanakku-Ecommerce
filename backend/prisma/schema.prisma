@@ -57,7 +57,7 @@ model ProductVersion {
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
   version   VersionType
-  price     Float
+  price     Float?
   renewalPrice Float?
   paymentRenewal PaymentRenewal @default(ONE_TIME)
   isDefault Boolean @default(false)

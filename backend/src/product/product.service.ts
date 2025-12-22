@@ -25,7 +25,7 @@ export class ProductService {
         data: versions.map(version => ({
           productId: product.id,
           version: version.version,
-          price: Number(version.price),
+          price: version.price ? Number(version.price) : null,
           renewalPrice: version.renewalPrice ? Number(version.renewalPrice) : null,
           paymentRenewal: version.paymentRenewal as PaymentRenewal,
           isDefault: version.isDefault
@@ -88,7 +88,7 @@ export class ProductService {
         data: versions.map(version => ({
           productId: id,
           version: version.version,
-          price: Number(version.price),
+          price: version.price ? Number(version.price) : null,
           renewalPrice: version.renewalPrice ? Number(version.renewalPrice) : null,
           paymentRenewal: version.paymentRenewal as PaymentRenewal,
           isDefault: version.isDefault

@@ -112,7 +112,7 @@ export class PurchaseHistoryService {
       
       const nextRenewalDate = this.calculateNextRenewalDate(currentDate, selectedVersion.paymentRenewal);
       return {
-        price: selectedVersion.renewalPrice || selectedVersion.price,
+        price: selectedVersion.renewalPrice || selectedVersion.price || 0,
         isRenewal: true,
         nextRenewalDate
       };
@@ -144,7 +144,7 @@ export class PurchaseHistoryService {
         if (purchasedVersionType === 'MULTI_USER' && selectedVersionType === 'SINGLE_USER') {
           const nextRenewalDate = this.calculateNextRenewalDate(currentDate, selectedVersion.paymentRenewal);
           return {
-            price: selectedVersion.price,
+            price: selectedVersion.price || 0,
             isRenewal: false,
             nextRenewalDate
           };
@@ -154,7 +154,7 @@ export class PurchaseHistoryService {
         if (purchasedVersionType === 'SINGLE_USER' && selectedVersionType === 'MULTI_USER') {
           const nextRenewalDate = this.calculateNextRenewalDate(currentDate, selectedVersion.paymentRenewal);
           return {
-            price: selectedVersion.renewalPrice || selectedVersion.price,
+            price: selectedVersion.renewalPrice || selectedVersion.price || 0,
             isRenewal: true,
             nextRenewalDate
           };
@@ -165,7 +165,7 @@ export class PurchaseHistoryService {
     // First time purchase
     const nextRenewalDate = this.calculateNextRenewalDate(currentDate, selectedVersion.paymentRenewal);
     return {
-      price: selectedVersion.price,
+      price: selectedVersion.price || 0,
       isRenewal: false,
       nextRenewalDate
     };

@@ -98,11 +98,11 @@ const ProductDetails = () => {
             <h1>{product.name}</h1>
 
             {/* Product Version Selection */}
-            {product.versions?.length > 0 && (
+            {product.versions?.filter(v => v.price !== null).length > 0 && (
               <div className="product-versions">
                 <h3>Choose Your Plan</h3>
                 <div className="version-options">
-                  {product.versions.map((version) => (
+                  {product.versions.filter(v => v.price !== null).map((version) => (
                     <div
                       key={version.id}
                       className={`version-card ${
@@ -118,7 +118,7 @@ const ProductDetails = () => {
                       </div>
                       <div className="version-pricing">
                         <span className="version-price">
-                          ₹{version.price.toLocaleString()}
+                          {version.price ? `₹${version.price.toLocaleString()}` : 'Price not set'}
                         </span>
                         {version.renewalPrice &&
                           !(
@@ -147,7 +147,7 @@ const ProductDetails = () => {
               {selectedVersion && (
                 <>
                   <span className="product-details__price">
-                    ₹{selectedVersion.price.toLocaleString()}
+                    {selectedVersion.price ? `₹${selectedVersion.price.toLocaleString()}` : 'Price not set'}
                   </span>
                   {renewalDate &&
                     selectedVersion.renewalPrice &&

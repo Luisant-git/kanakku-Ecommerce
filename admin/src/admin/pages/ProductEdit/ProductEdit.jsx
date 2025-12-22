@@ -165,14 +165,14 @@ const ProductEdit = () => {
       versions: [
         {
           version: "SINGLE_USER",
-          price: parseFloat(formData.singleUserPrice),
+          price: formData.singleUserPrice ? parseFloat(formData.singleUserPrice) : null,
           renewalPrice: formData.singleUserRenewalPrice ? parseFloat(formData.singleUserRenewalPrice) : null,
           paymentRenewal: formData.singleUserPaymentRenewal,
           isDefault: false
         },
         {
           version: "MULTI_USER",
-          price: parseFloat(formData.multiUserPrice),
+          price: formData.multiUserPrice ? parseFloat(formData.multiUserPrice) : null,
           renewalPrice: formData.multiUserRenewalPrice ? parseFloat(formData.multiUserRenewalPrice) : null,
           paymentRenewal: formData.multiUserPaymentRenewal,
           isDefault: true
@@ -402,7 +402,7 @@ const ProductEdit = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>
-                    Single User Price <span className="required">*</span>
+                    Single User Price
                   </label>
                   <input
                     type="number"
@@ -411,7 +411,6 @@ const ProductEdit = () => {
                     placeholder="0.00"
                     value={formData.singleUserPrice}
                     onChange={handleChange}
-                    required
                   />
                 </div>
 
@@ -446,7 +445,7 @@ const ProductEdit = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>
-                    Multi User Price <span className="required">*</span>
+                    Multi User Price
                   </label>
                   <input
                     type="number"
@@ -455,7 +454,6 @@ const ProductEdit = () => {
                     placeholder="0.00"
                     value={formData.multiUserPrice}
                     onChange={handleChange}
-                    required
                   />
                 </div>
 
