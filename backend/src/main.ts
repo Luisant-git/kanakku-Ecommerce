@@ -12,7 +12,12 @@ BigInt.prototype['toJSON'] = function() {
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: true,
+    bodyParser: true,
   });
+  
+  app.useBodyParser('json', { limit: '30mb' });
+  app.useBodyParser('urlencoded', { limit: '30mb', extended: true });
+  
   // Serve uploads folder as static assets
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
