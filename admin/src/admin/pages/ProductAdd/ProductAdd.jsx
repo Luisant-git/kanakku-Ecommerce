@@ -78,6 +78,11 @@ const ProductAdd = () => {
       const imageData = new FormData();
       formData.imageUrl.forEach((file) => imageData.append("files", file));
       const uploadRes = await uploadImageApi(imageData);
+      if (uploadRes?.error === 413) {
+        toast.error('413 Request Entity Too Large');
+        setLoading(false);
+        return;
+      }
       if (uploadRes && uploadRes.urls) {
         imageUrls = uploadRes.urls;
       }
@@ -88,6 +93,11 @@ const ProductAdd = () => {
       const fileData = new FormData();
       fileData.append("files", formData.productSourceFile);
       const uploadRes = await uploadImageApi(fileData);
+      if (uploadRes?.error === 413) {
+        toast.error('413 Request Entity Too Large');
+        setLoading(false);
+        return;
+      }
       if (uploadRes && uploadRes.urls && uploadRes.urls.length > 0) {
         productSourceUrl = uploadRes.urls[0].split('/').pop(); // Get just the filename
       }

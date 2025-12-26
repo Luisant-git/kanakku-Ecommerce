@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import { updateProductApi, getProductByIdApi } from "../../api/Product";
 import uploadImageApi from "../../api/Upload";
+import { toast } from "react-toastify";
 import "./ProductEdit.scss";
 
 const ProductEdit = () => {
@@ -136,6 +137,10 @@ const ProductEdit = () => {
         imageData.append("files", file);
       });
       const uploadRes = await uploadImageApi(imageData);
+      if (uploadRes?.error === 413) {
+        toast.error('413 Request Entity Too Large');
+        return;
+      }
       if (uploadRes && uploadRes.urls) {
         imageUrls = [...imageUrls, ...uploadRes.urls];
       }
@@ -149,6 +154,10 @@ const ProductEdit = () => {
       const sourceData = new FormData();
       sourceData.append("files", formData.productSourceFile);
       const uploadRes = await uploadImageApi(sourceData);
+      if (uploadRes?.error === 413) {
+        toast.error('413 Request Entity Too Large');
+        return;
+      }
       if (uploadRes && uploadRes.urls && uploadRes.urls.length > 0) {
         productSourceUrl = uploadRes.urls[0].split('/').pop(); // Get just the filename
       }
