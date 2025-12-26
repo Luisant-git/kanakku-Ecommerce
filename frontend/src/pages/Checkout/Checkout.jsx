@@ -11,6 +11,14 @@ const Checkout = () => {
   const location = useLocation();
   const { product, selectedVersion } = location.state || {};
   
+  const states = [
+    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
+    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
+    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
+    'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
+  ];
+  
   const [formData, setFormData] = useState({
     // firstName: '',
     // lastName: '',
@@ -174,11 +182,13 @@ const Checkout = () => {
     setLoading(true);
 
     try {
+      const taxType = formData.state === 'Tamil Nadu' ? 'CGST+SGST' : 'IGST';
       const orderData = {
         productId: product.id,
         versionId: selectedVersion.id,
         shippingAddress: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zip}`,
-        paymentMethod: formData.paymentMethod
+        paymentMethod: formData.paymentMethod,
+        taxType
       };
       const response = await createDirectOrderApi(orderData);
       
@@ -281,14 +291,18 @@ const Checkout = () => {
               </div>
               <div className="form-group">
                 <label htmlFor="state">State</label>
-                <input 
-                  type="text" 
-                  id="state" 
-                  name="state" 
-                  value={formData.state} 
-                  onChange={handleChange} 
-                  required 
-                />
+                <select
+                  id="state"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select State</option>
+                  {states.map(state => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
                 <label htmlFor="zip">Pin Code</label>
@@ -376,10 +390,23 @@ const Checkout = () => {
                 <span>Subtotal</span>
                 <span>₹{Math.round(subtotal * 100) / 100}</span>
               </div>
-              <div className="summary-row">
-                <span>GST ({product?.taxPercentage || 18}%)</span>
-                <span>₹{Math.round(tax * 100) / 100}</span>
-              </div>
+              {formData.state === 'Tamil Nadu' ? (
+                <>
+                  <div className="summary-row">
+                    <span>CGST ({(product?.taxPercentage || 18) / 2}%)</span>
+                    <span>₹{Math.round((tax / 2) * 100) / 100}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>SGST ({(product?.taxPercentage || 18) / 2}%)</span>
+                    <span>₹{Math.round((tax / 2) * 100) / 100}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="summary-row">
+                  <span>IGST ({product?.taxPercentage || 18}%)</span>
+                  <span>₹{Math.round(tax * 100) / 100}</span>
+                </div>
+              )}
               <div className="summary-row total">
                 <span>Total</span>
                 <span>₹{Math.round(total * 100) / 100}</span>

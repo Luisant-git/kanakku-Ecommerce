@@ -22,6 +22,7 @@ const Orders = () => {
       amount: order.total,
       subtotal: order.subtotal,
       tax: order.tax,
+      taxType: order.taxType || "IGST",
       status:
         order.status.toLowerCase() === "pending"
           ? "pending"
@@ -99,7 +100,7 @@ const orderStatusUpdate = async (id, status) => {
     {
       key: "tax",
       label: "Tax",
-      render: (value) => `₹${value?.toLocaleString() || 0}`,
+      render: (value, row) => `₹${value?.toLocaleString() || 0} (${row.taxType || 'IGST'})`,
     },
     {
       key: "status",

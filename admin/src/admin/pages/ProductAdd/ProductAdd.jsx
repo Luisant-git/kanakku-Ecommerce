@@ -178,8 +178,7 @@ const ProductAdd = () => {
           <div className="form-group">
             <label>Tax Percentage (%)</label>
             <input
-              type="number"
-              step="0.01"
+              type="text"
               name="taxPercentage"
               placeholder="18"
               value={formData.taxPercentage}

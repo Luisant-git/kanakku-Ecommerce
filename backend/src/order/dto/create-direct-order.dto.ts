@@ -12,4 +12,7 @@ export class CreateDirectOrderDto {
 
   @ApiProperty({ description: 'Payment method used', example: 'credit_card' })
   paymentMethod: string;
+
+  @ApiProperty({ description: 'Tax type', example: 'IGST', required: false })
+  taxType?: string;
 }

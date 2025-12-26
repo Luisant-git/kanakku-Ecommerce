@@ -97,6 +97,7 @@ model Order {
   items     OrderItem[]
   subtotal  Float?
   tax       Float?
+  taxType   String?   @default("IGST")
   total     Float
   status    OrderStatus @default(PENDING)
   shippingAddress String
@@ -117,7 +118,7 @@ model OrderItem {
   price     Float
   isRenewal Boolean  @default(false)
   nextRenewalDate DateTime?
-  licenseNo Int?
+  licenseNo BigInt?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

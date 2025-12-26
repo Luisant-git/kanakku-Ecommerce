@@ -103,7 +103,7 @@ const MyOrders = ({ orders }) => {
                   <span>₹{order.subtotal}</span>
                 </div>
                 <div className="summary-row">
-                  <span>Tax:</span>
+                  <span>Tax ({order.taxType || 'IGST'}):</span>
                   <span>₹{order.tax}</span>
                 </div>
                 {/* <div className="summary-row">

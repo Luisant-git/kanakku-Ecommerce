@@ -22,7 +22,7 @@ export class OrderService {
     userId: number,
     createDirectOrderDto: CreateDirectOrderDto,
   ) {
-    const { productId, versionId, shippingAddress, paymentMethod } =
+    const { productId, versionId, shippingAddress, paymentMethod, taxType } =
       createDirectOrderDto;
 
     // Get product and version details
@@ -69,6 +69,7 @@ export class OrderService {
         userId,
         subtotal,
         tax,
+        taxType: taxType || 'IGST',
         total,
         shippingAddress,
         paymentMethod,
@@ -140,7 +141,7 @@ export class OrderService {
         IsServer: 'N',
         IsAPIClient: 0,
         IsLocalSales: 'Y',
-        license_no: order.items[0].licenseNo || undefined,
+        license_no: order.items[0].licenseNo ? BigInt(order.items[0].licenseNo.toString()) : undefined,
         IsAccountsfirst: 'Y',
         IsFinancialStatement: 'Y',
       });
@@ -309,11 +310,11 @@ export class OrderService {
   private generateNumericLicenseNumber(
     productId: number,
     userId: number,
-  ): number {
+  ): bigint {
     const timestamp = Date.now().toString().slice(-6);
     const productCode = productId.toString().padStart(2, '0');
     const userCode = userId.toString().padStart(3, '0');
-    return parseInt(`${productCode}${userCode}${timestamp}`);
+    return BigInt(`${productCode}${userCode}${timestamp}`);
   }
 
   async totalRevenueByMonthOfCurrentYear() {

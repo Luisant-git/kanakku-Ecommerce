@@ -45,7 +45,7 @@ export class CreateNanoregDto {
   @ApiProperty({ example: 2.3, required: false }) Version?: number;
   @ApiProperty({ example: 'string', required: false }) SystemName?: string;
   @ApiProperty({ example: 2.3, required: false }) RunningVersion?: number;
-  @ApiProperty({ example: 2, required: false }) license_no?: number;
+  @ApiProperty({ example: 2, required: false }) license_no?: bigint;
   @ApiProperty({ example: 'Y', required: false }) IsAccountsfirst?: string;
   @ApiProperty({ example: 'Y', required: false }) IsFinancialStatement?: string;
 }
