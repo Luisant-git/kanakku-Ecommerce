@@ -25,7 +25,9 @@ const ProductEdit = () => {
   const [formData, setFormData] = useState({});
 
   const [imagePreview, setImagePreview] = useState([]);
-  const [imageFiles, setImageFiles] = useState([]); // Store File objects for new uploads
+  const [imageFiles, setImageFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showImageDeleteModal, setShowImageDeleteModal] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
@@ -91,9 +93,16 @@ const ProductEdit = () => {
     const imageData = new FormData();
     files.forEach((file) => imageData.append("files", file));
     
+    setUploading(true);
     const uploadRes = await uploadImageApi(imageData);
-    if (uploadRes?.error === 413) {
-      toast.error('413 Request Entity Too Large');
+    setUploading(false);
+    
+    if (uploadRes?.error) {
+      if (uploadRes.error === 413) {
+        toast.error('413 Request Entity Too Large');
+      } else {
+        toast.error(uploadRes.message || 'Upload failed');
+      }
       return;
     }
     
@@ -133,14 +142,20 @@ const ProductEdit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     let productSourceUrl = formData.productSource;
     
     if (formData.productSourceType === 'file' && formData.productSourceFile) {
       const sourceData = new FormData();
       sourceData.append("files", formData.productSourceFile);
       const uploadRes = await uploadImageApi(sourceData);
-      if (uploadRes?.error === 413) {
-        toast.error('413 Request Entity Too Large');
+      if (uploadRes?.error) {
+        if (uploadRes.error === 413) {
+          toast.error('413 Request Entity Too Large');
+        } else {
+          toast.error(uploadRes.message || 'Upload failed');
+        }
+        setLoading(false);
         return;
       }
       if (uploadRes && uploadRes.urls && uploadRes.urls.length > 0) {
@@ -176,6 +191,7 @@ const ProductEdit = () => {
       ]
     };
     const res = await updateProductApi(id, productPayload);
+    setLoading(false);
     if (res && res.id) {
       navigate("/admin/products");
     } else {
@@ -649,9 +665,10 @@ const ProductEdit = () => {
                   accept="image/*"
                   multiple
                   onChange={handleImageChange}
+                  disabled={uploading}
                 />
                 <FiUpload className="upload-icon" />
-                <div className="upload-text">Click to upload images</div>
+                <div className="upload-text">{uploading ? 'Uploading...' : 'Click to upload images'}</div>
                 <div className="upload-hint">PNG, JPG, GIF up to 10MB each</div>
               </div>
 
@@ -682,8 +699,8 @@ const ProductEdit = () => {
           <Link to="/admin/products" className="cancel-btn">
             Cancel
           </Link>
-          <button type="submit" className="save-btn">
-            <FiSave /> Update Product
+          <button type="submit" className="save-btn" disabled={loading}>
+            <FiSave /> {loading ? 'Updating...' : 'Update Product'}
           </button>
         </div>
       </form>

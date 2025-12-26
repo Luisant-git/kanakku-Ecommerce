@@ -26,6 +26,7 @@ const ProductAdd = () => {
   });
   const [imagePreview, setImagePreview] = useState([]);
   const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -51,12 +52,19 @@ const ProductAdd = () => {
 
     if (validFiles.length === 0) return;
 
+    setUploading(true);
     const imageData = new FormData();
     validFiles.forEach((file) => imageData.append("files", file));
     
     const uploadRes = await uploadImageApi(imageData);
-    if (uploadRes?.error === 413) {
-      toast.error('413 Request Entity Too Large');
+    setUploading(false);
+    
+    if (uploadRes?.error) {
+      if (uploadRes.error === 413) {
+        toast.error('413 Request Entity Too Large');
+      } else {
+        toast.error(uploadRes.message || 'Upload failed');
+      }
       return;
     }
     
@@ -75,8 +83,12 @@ const ProductAdd = () => {
       const fileData = new FormData();
       fileData.append("files", formData.productSourceFile);
       const uploadRes = await uploadImageApi(fileData);
-      if (uploadRes?.error === 413) {
-        toast.error('413 Request Entity Too Large');
+      if (uploadRes?.error) {
+        if (uploadRes.error === 413) {
+          toast.error('413 Request Entity Too Large');
+        } else {
+          toast.error(uploadRes.message || 'Upload failed');
+        }
         setLoading(false);
         return;
       }
@@ -262,9 +274,10 @@ const ProductAdd = () => {
               multiple
               onChange={handleImageChange}
               className="file-input"
+              disabled={uploading}
             />
             <FiUpload className="upload-icon" />
-            <div className="upload-text">Click to upload images</div>
+            <div className="upload-text">{uploading ? 'Uploading...' : 'Click to upload images'}</div>
             <div className="upload-subtext">PNG, JPG, GIF up to 2MB</div>
 
             {imagePreview.length > 0 && (
@@ -400,8 +413,8 @@ const ProductAdd = () => {
           <Link to="/admin/products" className="cancel-btn">
             Cancel
           </Link>
-          <button type="submit" className="save-btn">
-            <FiSave /> Save Product
+          <button type="submit" className="save-btn" disabled={loading}>
+            <FiSave /> {loading ? 'Saving...' : 'Save Product'}
           </button>
         </div>
       </form>

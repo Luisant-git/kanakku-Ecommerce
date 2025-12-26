@@ -9,9 +9,13 @@ const uploadImageApi = async (imageData) => {
     if (response.status === 413) {
       return { error: 413, message: 'Request Entity Too Large' };
     }
+    if (!response.ok) {
+      return { error: response.status, message: response.statusText };
+    }
     return response.json();
   } catch (error) {
     console.error('Error uploading image:', error);
+    return { error: 'network', message: error.message };
   }
 };
 
