@@ -86,16 +86,20 @@ const ProductEdit = () => {
     }
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
-    setImageFiles((prev) => [...prev, ...files]);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview((prev) => [...prev, reader.result]);
-      };
-      reader.readAsDataURL(file);
-    });
+    const imageData = new FormData();
+    files.forEach((file) => imageData.append("files", file));
+    
+    const uploadRes = await uploadImageApi(imageData);
+    if (uploadRes?.error === 413) {
+      toast.error('413 Request Entity Too Large');
+      return;
+    }
+    
+    if (uploadRes && uploadRes.urls) {
+      setImagePreview((prev) => [...prev, ...uploadRes.urls]);
+    }
   };
 
   const removeImage = (index) => {
@@ -129,27 +133,8 @@ const ProductEdit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let imageUrls = imagePreview.filter((img) => img.startsWith("http"));
-    // Upload new images if any
-    if (imageFiles.length > 0) {
-      const imageData = new FormData();
-      imageFiles.forEach((file) => {
-        imageData.append("files", file);
-      });
-      const uploadRes = await uploadImageApi(imageData);
-      if (uploadRes?.error === 413) {
-        toast.error('413 Request Entity Too Large');
-        return;
-      }
-      if (uploadRes && uploadRes.urls) {
-        imageUrls = [...imageUrls, ...uploadRes.urls];
-      }
-    }
-    
-
-    
-    // Handle file upload for product source
     let productSourceUrl = formData.productSource;
+    
     if (formData.productSourceType === 'file' && formData.productSourceFile) {
       const sourceData = new FormData();
       sourceData.append("files", formData.productSourceFile);
@@ -159,10 +144,10 @@ const ProductEdit = () => {
         return;
       }
       if (uploadRes && uploadRes.urls && uploadRes.urls.length > 0) {
-        productSourceUrl = uploadRes.urls[0].split('/').pop(); // Get just the filename
+        productSourceUrl = uploadRes.urls[0].split('/').pop();
       }
     } else if (formData.productSourceType === 'url') {
-      productSourceUrl = formData.productSource; // Keep the URL as is
+      productSourceUrl = formData.productSource;
     }
     
     const productPayload = {
@@ -171,7 +156,7 @@ const ProductEdit = () => {
       taxPercentage: parseFloat(formData.taxPercentage),
       productSource: productSourceUrl || null,
       productSourceType: formData.productSourceType,
-      imageUrl: imageUrls,
+      imageUrl: imagePreview.filter((img) => img.startsWith("http")),
 
       versions: [
         {

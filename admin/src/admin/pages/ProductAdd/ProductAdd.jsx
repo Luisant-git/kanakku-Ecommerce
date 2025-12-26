@@ -18,13 +18,14 @@ const ProductAdd = () => {
     multiUserPrice: "",
     multiUserRenewalPrice: "",
     multiUserPaymentRenewal: "ONE_TIME",
-    imageUrl: [], // array of files
+    imageUrl: [],
     productSource: "",
     productSourceFile: null,
-    productSourceType: "url", // "url" or "file"
+    productSourceType: "url",
 
   });
-  const [imagePreview, setImagePreview] = useState([]); // array of previews
+  const [imagePreview, setImagePreview] = useState([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -36,11 +37,10 @@ const ProductAdd = () => {
     }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
-    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    const maxSize = 2 * 1024 * 1024;
     
-    // Filter out files larger than 2MB
     const validFiles = files.filter(file => {
       if (file.size > maxSize) {
         toast.error(`Image "${file.name}" exceeds 2MB limit. Please select a smaller image.`);
@@ -49,46 +49,28 @@ const ProductAdd = () => {
       return true;
     });
 
-    if (validFiles.length === 0) {
-      return; // No valid files selected
+    if (validFiles.length === 0) return;
+
+    const imageData = new FormData();
+    validFiles.forEach((file) => imageData.append("files", file));
+    
+    const uploadRes = await uploadImageApi(imageData);
+    if (uploadRes?.error === 413) {
+      toast.error('413 Request Entity Too Large');
+      return;
     }
-
-    setFormData((prev) => ({ ...prev, imageUrl: validFiles }));
-
-    // Read all valid files and set previews
-    Promise.all(
-      validFiles.map(
-        (file) =>
-          new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(file);
-          })
-      )
-    ).then((images) => setImagePreview(images));
+    
+    if (uploadRes && uploadRes.urls) {
+      setUploadedImageUrls((prev) => [...prev, ...uploadRes.urls]);
+      setImagePreview((prev) => [...prev, ...uploadRes.urls]);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    let imageUrls = [];
     let productSourceUrl = formData.productSource;
     
-    if (formData.imageUrl && formData.imageUrl.length > 0) {
-      const imageData = new FormData();
-      formData.imageUrl.forEach((file) => imageData.append("files", file));
-      const uploadRes = await uploadImageApi(imageData);
-      if (uploadRes?.error === 413) {
-        toast.error('413 Request Entity Too Large');
-        setLoading(false);
-        return;
-      }
-      if (uploadRes && uploadRes.urls) {
-        imageUrls = uploadRes.urls;
-      }
-    }
-    
-    // Handle file upload for productSource
     if (formData.productSourceType === 'file' && formData.productSourceFile) {
       const fileData = new FormData();
       fileData.append("files", formData.productSourceFile);
@@ -99,10 +81,10 @@ const ProductAdd = () => {
         return;
       }
       if (uploadRes && uploadRes.urls && uploadRes.urls.length > 0) {
-        productSourceUrl = uploadRes.urls[0].split('/').pop(); // Get just the filename
+        productSourceUrl = uploadRes.urls[0].split('/').pop();
       }
     } else if (formData.productSourceType === 'url') {
-      productSourceUrl = formData.productSource; // Keep the URL as is
+      productSourceUrl = formData.productSource;
     }
     
 
@@ -110,7 +92,7 @@ const ProductAdd = () => {
       name: formData.name,
       description: formData.description,
       taxPercentage: parseFloat(formData.taxPercentage),
-      imageUrl: imageUrls,
+      imageUrl: uploadedImageUrls,
       productSource: productSourceUrl || null,
       productSourceType: formData.productSourceType,
 
@@ -294,13 +276,8 @@ const ProductAdd = () => {
                       type="button"
                       className="remove-image"
                       onClick={() => {
-                        setImagePreview((prev) =>
-                          prev.filter((_, i) => i !== idx)
-                        );
-                        setFormData((prev) => ({
-                          ...prev,
-                          imageUrl: prev.imageUrl.filter((_, i) => i !== idx),
-                        }));
+                        setImagePreview((prev) => prev.filter((_, i) => i !== idx));
+                        setUploadedImageUrls((prev) => prev.filter((_, i) => i !== idx));
                       }}
                     >
                       <FiX />
