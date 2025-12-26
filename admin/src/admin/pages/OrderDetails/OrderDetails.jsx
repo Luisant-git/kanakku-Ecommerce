@@ -63,7 +63,7 @@ const OrderDetails = () => {
               <span>₹{order.subtotal || 0}</span>
             </div>
             <div className="info-item">
-              <label>Tax:</label>
+              <label>Tax ({order.taxType || 'IGST'}):</label>
               <span>₹{order.tax || 0}</span>
             </div>
             <div className="info-item">
