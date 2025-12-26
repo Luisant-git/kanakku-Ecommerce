@@ -40,11 +40,11 @@ const ProductAdd = () => {
 
   const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize = 30 * 1024 * 1024;
     
     const validFiles = files.filter(file => {
       if (file.size > maxSize) {
-        toast.error(`Image "${file.name}" exceeds 5MB limit. Please select a smaller image.`);
+        toast.error(`Image "${file.name}" exceeds 30MB limit. Please select a smaller image.`);
         return false;
       }
       return true;
@@ -277,7 +277,7 @@ const ProductAdd = () => {
             />
             <FiUpload className="upload-icon" />
             <div className="upload-text">{uploading ? 'Uploading...' : 'Click to upload images'}</div>
-            <div className="upload-subtext">PNG, JPG, GIF up to 5MB</div>
+            <div className="upload-subtext">PNG, JPG, GIF up to 30MB</div>
 
             {imagePreview.length > 0 && (
               <div className="image-preview-list">

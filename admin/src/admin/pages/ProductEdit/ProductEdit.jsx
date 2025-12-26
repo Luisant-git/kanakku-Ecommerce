@@ -668,7 +668,7 @@ const ProductEdit = () => {
                 />
                 <FiUpload className="upload-icon" />
                 <div className="upload-text">{uploading ? 'Uploading...' : 'Click to upload images'}</div>
-                <div className="upload-hint">PNG, JPG, GIF up to 5MB each</div>
+                <div className="upload-hint">PNG, JPG, GIF up to 30MB each</div>
               </div>
 
               {imagePreview.length > 0 && (
